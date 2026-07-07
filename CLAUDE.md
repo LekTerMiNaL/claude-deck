@@ -78,3 +78,11 @@ clean and never commit anything containing the owner's transcript data.
   `../vesta/node_modules/playwright`) when showing UI work.
 - Never commit real transcript content, session ids, or the owner's project names in fixtures —
   synthesize fake fixtures for tests/screenshots that will go public.
+- **Every feature follows the pipeline** (pattern borrowed from `../builtin-asset-spac`):
+  1. **spec** in `docs/spec/<phase-or-feature>.md` (acceptance criteria + test plan) — no code before spec,
+  2. **code**,
+  3. **Vitest unit tests** for data-layer/lib logic,
+  4. **Playwright e2e** in `e2e/` against the built server pointed at a **synthesized** fake
+     claude-dir fixture (env: `CLAUDE_DECK_CLAUDE_DIR`, `CLAUDE_DECK_CONFIG_DIR`, `CLAUDE_DECK_FAKE_PIDS`),
+  5. **QA screenshots** via `scripts/qa-shots.mjs` for the owner to review (often on a phone).
+  Gate = typecheck + build + unit + e2e all green before merge.

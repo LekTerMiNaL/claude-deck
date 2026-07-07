@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# generated e2e fixture world + per-run config
+e2e/fixtures/
+e2e/.tmp-config/
+test-results/
+playwright-report/
+
+# qa screenshots (sent, not committed)
+shots/
+
+.DS_Store
