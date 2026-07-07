@@ -15,9 +15,12 @@ clean and never commit anything containing the owner's transcript data.
       they ARE the design reference, built to be pixel-honest)
 - [x] Phase 1: scaffold + data layer + Dashboard + add-project flow (spec: `docs/spec/phase-1.md`,
       merged 2026-07-08; gate = typecheck + build + 13 unit + 6 e2e, all green)
-- [ ] Phase 2: Session view + resume + live status polling
-- [ ] Phase 3 (later, after real use): AI summaries via `claude -p`, open-terminal action,
-      cross-project timeline
+- [x] Phase 2: Session view + resume + live status polling (spec: `docs/spec/phase-2.md`,
+      merged 2026-07-08)
+- [x] Phase 3: AI summaries via `claude -p` (haiku, cached in `~/.claude-deck/summaries.json`),
+      open-in-Terminal (macOS osascript, feature-detected), cross-project timeline at `/timeline`
+      (spec: `docs/spec/phase-3.md`, merged 2026-07-08)
+- Full gate as of Phase 3: 31 Vitest unit + 18 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Local git repo here; GitHub repo comes later (public, MIT).

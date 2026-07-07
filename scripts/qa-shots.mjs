@@ -24,6 +24,8 @@ const server = spawn("node", ["dist/server/index.js"], {
     CLAUDE_DECK_CLAUDE_DIR: path.resolve("e2e/fixtures/claude-home"),
     CLAUDE_DECK_CONFIG_DIR: configDir,
     CLAUDE_DECK_FAKE_PIDS: "111111,222222",
+    CLAUDE_DECK_CLAUDE_BIN: path.resolve("e2e/fixtures/fake-claude.sh"),
+    CLAUDE_DECK_FAKE_OPEN: path.resolve("e2e/.tmp-open-log"),
   },
   stdio: "inherit",
 });
@@ -75,6 +77,16 @@ await desktop.screenshot({ path: `${OUT}/6-session-view.png`, fullPage: true });
 await mobile.locator('[data-testid="deck-card"]', { hasText: "rocket-shop" }).click();
 await mobile.waitForSelector('[data-testid="thread"]');
 await mobile.screenshot({ path: `${OUT}/7-session-mobile.png`, fullPage: true });
+
+// 8. session view with AI summary (fake claude bin)
+await desktop.getByTestId("summarize-btn").click();
+await desktop.waitForSelector('[data-testid="summary-card"]');
+await desktop.screenshot({ path: `${OUT}/8-session-summary.png`, fullPage: true });
+
+// 9. timeline
+await desktop.goto(`${BASE}/timeline`);
+await desktop.waitForSelector('[data-testid="timeline-row"]');
+await desktop.screenshot({ path: `${OUT}/9-timeline.png`, fullPage: true });
 
 await b.close();
 server.kill();

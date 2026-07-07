@@ -112,7 +112,23 @@ export const api = {
     get<{ meta: SessionMeta; thread: ThreadMessage[] }>(
       `/api/session?path=${encodeURIComponent(path)}&id=${encodeURIComponent(id)}`,
     ),
+  capabilities: () => get<{ openTerminal: boolean; summarize: boolean }>("/api/capabilities"),
+  timeline: (limit = 100) => get<{ entries: TimelineEntry[] }>(`/api/timeline?limit=${limit}`),
+  summarize: (path: string, id: string) =>
+    send<{ summary: string; cached: boolean }>("POST", "/api/session/summary", { path, id }),
+  openTerminal: (path: string, id: string) =>
+    send<{ ok: boolean }>("POST", "/api/open-terminal", { path, id }),
 };
+
+export interface TimelineEntry {
+  ts: number;
+  display: string;
+  project: string;
+  projectName: string;
+  displayPath: string;
+  sessionId: string;
+  inDeck: boolean;
+}
 
 export function timeAgo(ts: number, now = Date.now()): string {
   if (!ts) return "—";

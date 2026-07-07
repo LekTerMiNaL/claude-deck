@@ -8,6 +8,15 @@ import { readHistoryIndex } from "./data/history.js";
 import { expandHome, shortenHome } from "./data/paths.js";
 import { listProjectSessions, transcriptFile, SESSION_ID_RE } from "./data/project-sessions.js";
 import { tailReadJsonl, parseThread, countRenderable, extractAiTitle } from "./data/transcripts.js";
+import {
+  getCachedSummary,
+  cacheSummary,
+  buildSummaryInput,
+  summaryPrompt,
+  runClaudeSummary,
+} from "./data/summary.js";
+import { canOpenTerminal, openInTerminal } from "./data/terminal.js";
+import { timeline } from "./data/timeline.js";
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -126,6 +135,59 @@ export function createApp(): Hono {
       },
       thread,
     });
+  });
+
+  app.get("/api/capabilities", (c) =>
+    c.json({ openTerminal: canOpenTerminal(), summarize: true }),
+  );
+
+  app.get("/api/timeline", (c) => {
+    const limit = Math.min(500, Math.max(1, Number(c.req.query("limit")) || 100));
+    return c.json({ entries: timeline(limit) });
+  });
+
+  app.post("/api/session/summary", async (c) => {
+    const body = (await c.req.json().catch(() => ({}))) as { path?: string; id?: string };
+    const { path: projectPath, id } = body;
+    if (!projectPath || !id) return c.json({ error: "path and id are required" }, 400);
+    if (!SESSION_ID_RE.test(id)) return c.json({ error: "invalid session id" }, 400);
+    const file = transcriptFile(projectPath, id);
+    if (!fs.existsSync(file)) return c.json({ error: "transcript not found" }, 404);
+
+    const tail = tailReadJsonl(file);
+    const cached = getCachedSummary(id, tail.size);
+    if (cached) return c.json({ summary: cached.summary, cached: true });
+
+    const thread = parseThread(tail.lines);
+    if (thread.length === 0) return c.json({ error: "nothing to summarize" }, 422);
+
+    try {
+      const summary = await runClaudeSummary(
+        summaryPrompt(path.basename(projectPath), buildSummaryInput(thread)),
+      );
+      if (!summary) return c.json({ error: "empty summary from claude -p" }, 502);
+      cacheSummary({ sessionId: id, summary, transcriptSize: tail.size, createdAt: Date.now() });
+      return c.json({ summary, cached: false });
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "ENOENT") return c.json({ error: "claude CLI not found on this machine" }, 503);
+      return c.json({ error: `claude -p failed: ${(err as Error).message}` }, 502);
+    }
+  });
+
+  app.post("/api/open-terminal", async (c) => {
+    const body = (await c.req.json().catch(() => ({}))) as { path?: string; id?: string };
+    const { path: projectPath, id } = body;
+    if (!projectPath || !id) return c.json({ error: "path and id are required" }, 400);
+    if (!SESSION_ID_RE.test(id)) return c.json({ error: "invalid session id" }, 400);
+    if (!canOpenTerminal()) return c.json({ error: "open-in-terminal is macOS only" }, 501);
+    if (!fs.existsSync(projectPath)) return c.json({ error: "project folder not found" }, 404);
+    try {
+      await openInTerminal(projectPath, id);
+      return c.json({ ok: true });
+    } catch (err) {
+      return c.json({ error: `osascript failed: ${(err as Error).message}` }, 502);
+    }
   });
 
   return app;

@@ -23,6 +23,8 @@ export default defineConfig({
       // each run gets a fresh config dir via global setup writing this file
       CLAUDE_DECK_CONFIG_DIR: path.resolve("e2e/.tmp-config"),
       CLAUDE_DECK_FAKE_PIDS: "111111,222222",
+      CLAUDE_DECK_CLAUDE_BIN: path.resolve("e2e/fixtures/fake-claude.sh"),
+      CLAUDE_DECK_FAKE_OPEN: path.resolve("e2e/.tmp-open-log"),
     },
   },
   globalSetup: "./e2e/global-setup.ts",

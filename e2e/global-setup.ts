@@ -112,6 +112,19 @@ export default function globalSetup(): void {
     fs.writeFileSync(path.join(dir, `${sid}.jsonl`), lines.join("\n") + "\n");
   }
 
+  // fake `claude` CLI for summary e2e: records each call, echoes a canned summary
+  const fakeBin = path.join(e2eDir, "fixtures", "fake-claude.sh");
+  const callLog = path.join(e2eDir, ".tmp-claude-calls");
+  fs.rmSync(callLog, { force: true });
+  fs.writeFileSync(
+    fakeBin,
+    `#!/bin/sh\necho "call" >> "${callLog}"\necho "สรุป: ทำหน้า checkout และแก้บั๊กเครื่องยนต์ร้อนเกินเสร็จแล้ว เหลือเก็บงานทดสอบ"\n`,
+  );
+  fs.chmodSync(fakeBin, 0o755);
+
+  // fake open-terminal sink
+  fs.rmSync(path.join(e2eDir, ".tmp-open-log"), { force: true });
+
   const sessions = [
     { pid: 111111, sessionId: SID_ROCKET, cwd: rocket, name: "rocket-shop-7", status: "busy", startedAt: now - 8_040_000, updatedAt: now },
     { pid: 222222, sessionId: SID_MOON, cwd: moon, name: "moon-blog-2", status: "idle", startedAt: now - 3_600_000, updatedAt: now },
