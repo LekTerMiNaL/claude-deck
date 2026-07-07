@@ -25,6 +25,11 @@ export function SessionView({ projectPath, initialSessionId, navigate }: Props) 
   const [thread, setThread] = useState<ThreadMessage[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [caps, setCaps] = useState<{ openTerminal: boolean }>({ openTerminal: false });
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+  const [summaryError, setSummaryError] = useState("");
+  const [opened, setOpened] = useState(false);
 
   const refreshProject = useCallback(async () => {
     try {
@@ -58,10 +63,42 @@ export function SessionView({ projectPath, initialSessionId, navigate }: Props) 
 
   useEffect(() => {
     setCopied(false);
+    setSummary(null);
+    setSummaryError("");
+    setOpened(false);
     void refreshSession();
     const t = setInterval(() => void refreshSession(), POLL_MS);
     return () => clearInterval(t);
   }, [refreshSession]);
+
+  useEffect(() => {
+    api.capabilities().then(setCaps).catch(() => {});
+  }, []);
+
+  const summarize = async () => {
+    if (!selected || summarizing) return;
+    setSummarizing(true);
+    setSummaryError("");
+    try {
+      const res = await api.summarize(projectPath, selected);
+      setSummary(res.summary);
+    } catch (e) {
+      setSummaryError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSummarizing(false);
+    }
+  };
+
+  const openTerminal = async () => {
+    if (!selected) return;
+    try {
+      await api.openTerminal(projectPath, selected);
+      setOpened(true);
+      setTimeout(() => setOpened(false), 2500);
+    } catch {
+      // surfaced already server-side; keep quiet in UI beyond no feedback
+    }
+  };
 
   const pick = (id: string) => {
     setSelected(id);
@@ -169,8 +206,43 @@ export function SessionView({ projectPath, initialSessionId, navigate }: Props) 
                 >
                   {copied ? "copied ✓" : "copy"}
                 </button>
+                {caps.openTerminal && (
+                  <button
+                    data-testid="open-terminal-btn"
+                    onClick={() => void openTerminal()}
+                    className="cursor-pointer whitespace-nowrap rounded-[9px] border border-cyan/35 px-3 py-[9px] font-mono text-[11.5px] text-cyan hover:bg-cyan/10"
+                    title="resume this session in a new Terminal window"
+                  >
+                    {opened ? "opened ✓" : "terminal ⧉"}
+                  </button>
+                )}
               </div>
             </div>
+
+            <div className="mt-3 flex items-start gap-[10px]">
+              <button
+                data-testid="summarize-btn"
+                onClick={() => void summarize()}
+                disabled={summarizing}
+                className="flex-none cursor-pointer rounded-[9px] border border-vio/35 px-3 py-[7px] font-mono text-[11.5px] text-vio hover:bg-vio/10 disabled:cursor-wait disabled:opacity-60"
+              >
+                {summarizing ? "✦ summarizing…" : summary ? "✦ re-summarize" : "✦ summarize"}
+              </button>
+              {summaryError && (
+                <p className="py-[7px] font-mono text-[11.5px] text-[#fbbf24]" data-testid="summary-error">
+                  ⚠ {summaryError}
+                </p>
+              )}
+            </div>
+            {summary && (
+              <div
+                data-testid="summary-card"
+                className="mt-3 max-w-[820px] rounded-[14px] border border-vio/25 bg-glass px-4 py-[13px] backdrop-blur-[8px]"
+              >
+                <p className="mb-[5px] font-mono text-[11px] text-vio">✦ ai summary</p>
+                <p className="whitespace-pre-wrap text-[13px] text-muted">{summary}</p>
+              </div>
+            )}
 
             <div className="mt-[22px] flex max-w-[820px] flex-col gap-[14px]" data-testid="thread">
               {meta.truncated && (
