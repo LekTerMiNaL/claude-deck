@@ -13,7 +13,8 @@ clean and never commit anything containing the owner's transcript data.
 ## Status (as of 2026-07-07)
 - [x] Concept + 3 mock screens approved by owner (see `docs/mockups/*.html` — open in a browser;
       they ARE the design reference, built to be pixel-honest)
-- [ ] Phase 1: scaffold + data layer + Dashboard + add-project flow
+- [x] Phase 1: scaffold + data layer + Dashboard + add-project flow (spec: `docs/spec/phase-1.md`,
+      merged 2026-07-08; gate = typecheck + build + 13 unit + 6 e2e, all green)
 - [ ] Phase 2: Session view + resume + live status polling
 - [ ] Phase 3 (later, after real use): AI summaries via `claude -p`, open-terminal action,
       cross-project timeline
