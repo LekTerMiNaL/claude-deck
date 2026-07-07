@@ -55,7 +55,7 @@ test("add from scanned list → deck card with stats + in-deck mark", async ({ p
 
   await page.keyboard.press("Escape");
   const card = page.getByTestId("deck-card").filter({ hasText: "rocket-shop" });
-  await expect(card).toContainText("sessions 1");
+  await expect(card).toContainText("sessions 2");
   await expect(card).toContainText("prompts 2");
   await expect(card).toContainText("● 1 live");
   await expect(card).toContainText("fix rocket engine overheating bug");

@@ -58,6 +58,46 @@ async function send<T>(method: string, url: string, body: unknown): Promise<T> {
   return data;
 }
 
+export interface ProjectSession {
+  id: string;
+  title: string;
+  firstPrompt: string;
+  lastPrompt: string;
+  promptCount: number;
+  lastTs: number;
+  size: number;
+  live: { pid: number; status: "busy" | "idle"; name: string } | null;
+}
+
+export interface ProjectInfo {
+  path: string;
+  displayPath: string;
+  name: string;
+  missing: boolean;
+}
+
+export interface ThreadMessage {
+  role: "user" | "assistant";
+  text: string;
+  tools: string[];
+  ts: string | null;
+}
+
+export interface SessionMeta {
+  id: string;
+  shortId: string;
+  title: string;
+  status: "busy" | "idle" | null;
+  startedAt: number | null;
+  lastTs: number | null;
+  size: number;
+  promptCount: number;
+  resumeCmd: string;
+  truncated: boolean;
+  shownCount: number;
+  windowCount: number;
+}
+
 export const api = {
   live: () => get<{ sessions: LiveCard[] }>("/api/live"),
   deck: () => get<{ projects: DeckCard[] }>("/api/deck"),
@@ -66,6 +106,12 @@ export const api = {
   addProject: (path: string) => send<{ ok: boolean }>("POST", "/api/deck", { path }),
   removeProject: (path: string) => send<{ ok: boolean }>("DELETE", "/api/deck", { path }),
   addRoot: (path: string) => send<{ ok: boolean }>("POST", "/api/roots", { path }),
+  project: (path: string) =>
+    get<{ project: ProjectInfo; sessions: ProjectSession[] }>(`/api/project?path=${encodeURIComponent(path)}`),
+  session: (path: string, id: string) =>
+    get<{ meta: SessionMeta; thread: ThreadMessage[] }>(
+      `/api/session?path=${encodeURIComponent(path)}&id=${encodeURIComponent(id)}`,
+    ),
 };
 
 export function timeAgo(ts: number, now = Date.now()): string {

@@ -68,6 +68,14 @@ await mobile.goto(BASE);
 await mobile.waitForSelector('[data-testid="deck-card"]');
 await mobile.screenshot({ path: `${OUT}/5-dashboard-mobile.png`, fullPage: true });
 
+// 6. session view (desktop + mobile) — rocket-shop has the realistic thread
+await desktop.locator('[data-testid="deck-card"]', { hasText: "rocket-shop" }).click();
+await desktop.waitForSelector('[data-testid="thread"]');
+await desktop.screenshot({ path: `${OUT}/6-session-view.png`, fullPage: true });
+await mobile.locator('[data-testid="deck-card"]', { hasText: "rocket-shop" }).click();
+await mobile.waitForSelector('[data-testid="thread"]');
+await mobile.screenshot({ path: `${OUT}/7-session-mobile.png`, fullPage: true });
+
 await b.close();
 server.kill();
 fs.rmSync(configDir, { recursive: true, force: true });
