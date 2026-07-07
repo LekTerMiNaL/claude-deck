@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>claude-deck — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0d1c;--ink:#e8ebf7;--muted:#9aa3c0;--faint:#5b6382;--line:rgba(255,255,255,.09);--glass:rgba(255,255,255,.045);--vio:#a78bfa;--cyan:#67e8f9;--busy:#4ade80;}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Inter",sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px;position:relative}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"JetBrains Mono",monospace}
+.disp{font-family:"Space Grotesk",sans-serif}
+.grad{background:linear-gradient(90deg,var(--vio),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.glow{position:fixed;pointer-events:none;border-radius:50%;filter:blur(90px)}
+.g1{top:-80px;left:10%;width:460px;height:460px;background:rgba(167,139,250,.13)}
+.g2{top:200px;right:-100px;width:420px;height:420px;background:rgba(103,232,249,.08)}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line);position:relative}
+.logo{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px}
+.logo::before{content:"~/";color:var(--faint);font-weight:400}
+.hright{display:flex;gap:14px;align-items:center}
+.livepill{display:flex;align-items:center;gap:8px;border:1px solid rgba(74,222,128,.35);border-radius:999px;padding:6px 14px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--busy)}
+.livepill i{width:7px;height:7px;border-radius:50%;background:var(--busy);font-style:normal;box-shadow:0 0 10px var(--busy)}
+.addbtn{border-radius:10px;background:linear-gradient(90deg,var(--vio),var(--cyan));color:#0a0d1c;font-weight:700;font-size:13px;padding:9px 16px;font-family:"Space Grotesk",sans-serif}
+.sect{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:34px 0 14px}
+.sect::before{content:"## ";color:var(--cyan)}
+.livegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.livecard{border:1px solid var(--line);background:var(--glass);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);position:relative}
+.livecard .st{display:flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;font-size:11.5px}
+.st i{width:8px;height:8px;border-radius:50%;font-style:normal}
+.st.busy{color:var(--busy)} .st.busy i{background:var(--busy);box-shadow:0 0 10px var(--busy);animation:pulse 1.4s infinite}
+.st.idle{color:var(--faint)} .st.idle i{background:var(--faint)}
+@keyframes pulse{50%{opacity:.4}}
+.livecard h3{font-family:"JetBrains Mono",monospace;font-size:14.5px;margin-top:8px}
+.livecard p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.livecard .last{color:var(--faint);font-size:12px;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.livecard .go{position:absolute;top:14px;right:14px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--cyan);border:1px solid rgba(103,232,249,.35);border-radius:7px;padding:4px 10px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border:1px solid var(--line);background:var(--glass);border-radius:18px;backdrop-filter:blur(8px);overflow:hidden}
+.card .bar{display:flex;align-items:center;gap:6px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.r{background:#ff6666}.dot.y{background:#ffcc66}.dot.g{background:#55ff66}
+.card .bar .t{margin-left:6px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint)}
+.card .bar .lv{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--busy)}
+.cb{padding:16px 18px}
+.card h3{font-family:"Space Grotesk",sans-serif;font-size:18px;font-weight:700}
+.card .path{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:flex;gap:14px;margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted)}
+.stats b{color:var(--ink);font-weight:500}
+.stats .em{color:var(--cyan)}
+.lastp{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;color:var(--muted);font-size:12.5px;font-style:italic;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lastp::before{content:"❯ ";color:var(--vio);font-style:normal;font-family:"JetBrains Mono",monospace}
+.addcard{border:1.5px dashed var(--line);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--faint);min-height:170px;cursor:pointer}
+.addcard .plus{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;font-size:22px;color:var(--cyan)}
+.addcard p{font-family:"JetBrains Mono",monospace;font-size:12.5px}
+footer{margin-top:40px;border-top:1px solid var(--line);padding:18px 0 26px;color:var(--faint);font-size:11.5px;text-align:center;font-family:"JetBrains Mono",monospace}
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+<div class="wrap">
+  <header>
+    <span class="logo"><span class="grad">claude-deck</span></span>
+    <div class="hright">
+      <span class="livepill"><i></i>2 sessions running</span>
+      <a class="addbtn disp" href="#">+ Add project</a>
+    </div>
+  </header>
+
+  <p class="sect">Live now</p>
+  <div class="livegrid">
+    <div class="livecard">
+      <span class="st busy"><i></i>busy</span>
+      <a class="go" href="#">open ↗</a>
+      <h3>vesta-25</h3>
+      <p>vesta · pid 13525 · 2h 14m</p>
+      <p class="last">❯ แก้ bug หน้า portfolio ตอน refresh ราคา…</p>
+    </div>
+    <div class="livecard">
+      <span class="st busy"><i></i>busy</span>
+      <a class="go" href="#">open ↗</a>
+      <h3>lekterminaldev-bc</h3>
+      <p>lekTerMiNaLDev · pid 47137 · 3d 4h</p>
+      <p class="last">❯ ทำให้รองรับทั้ง desktop และ mobile ด้วย</p>
+    </div>
+    <div class="livecard">
+      <span class="st idle"><i></i>idle</span>
+      <a class="go" href="#">open ↗</a>
+      <h3>goldenrun-7a</h3>
+      <p>goldenrun · pid 40051 · 6h 02m</p>
+      <p class="last">❯ สรุป flow การจองรอบวิ่งให้หน่อย</p>
+    </div>
+  </div>
+
+  <p class="sect">Deck — 4 projects</p>
+  <div class="grid">
+    <div class="card">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">vesta</span><span class="lv">● 1 live</span></div>
+      <div class="cb">
+        <h3>Vesta</h3>
+        <p class="path">~/Documents/AiProject/vesta</p>
+        <div class="stats"><span>sessions <b>25</b></span><span>last <b class="em">2m ago</b></span><span>prompts <b>1,204</b></span></div>
+        <p class="lastp">แก้ bug หน้า portfolio ตอน refresh ราคาทองแล้วกราฟไม่อัปเดต</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">lekTerMiNaLDev</span><span class="lv">● 1 live</span></div>
+      <div class="cb">
+        <h3>lekTerMiNaLDev</h3>
+        <p class="path">~/Documents/AiProject/lekTerMiNaLDev</p>
+        <div class="stats"><span>sessions <b>1</b></span><span>last <b class="em">now</b></span><span>prompts <b>18</b></span></div>
+        <p class="lastp">ทำให้รองรับทั้ง desktop และ mobile ด้วย</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="t">clinic-management-system</span></div>
+      <div class="cb">
+        <h3>Clinic MS</h3>
+        <p class="path">~/Documents/AiProject/clinic-management-system</p>
+        <div class="stats"><span>sessions <b>8</b></span><span>last <b>4d ago</b></span><span>prompts <b>342</b></span></div>
+        <p class="lastp">ทำระบบนัดหมายคนไข้ต่อ เชื่อมกับตารางหมอ</p>
+      </div>
+    </div>
+    <div class="addcard">
+      <span class="plus">+</span>
+      <p>add project to deck</p>
+    </div>
+  </div>
+
+  <footer>claude-deck · local only (127.0.0.1) · reads ~/.claude read-only · crafted with claude code</footer>
+</div>
+</body>
+</html>

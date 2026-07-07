@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>claude-deck — Add project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0d1c;--ink:#e8ebf7;--muted:#9aa3c0;--faint:#5b6382;--line:rgba(255,255,255,.09);--glass:rgba(255,255,255,.045);--vio:#a78bfa;--cyan:#67e8f9;--busy:#4ade80;}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Inter",sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+.backdrop{position:fixed;inset:0;background:rgba(4,6,14,.72);backdrop-filter:blur(4px)}
+.dim{filter:blur(2px);opacity:.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+.mono{font-family:"JetBrains Mono",monospace}
+.grad{background:linear-gradient(90deg,var(--vio),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line)}
+.logo{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px}
+.logo::before{content:"~/";color:var(--faint);font-weight:400}
+.sect{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:34px 0 14px}
+.ph{height:120px;border:1px solid var(--line);border-radius:18px;background:var(--glass);margin-bottom:16px}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:640px;max-width:92vw;border:1px solid var(--line);background:#0d1122;border-radius:20px;box-shadow:0 40px 100px rgba(0,0,0,.6);overflow:hidden}
+.mhead{display:flex;align-items:center;gap:6px;padding:14px 20px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.r{background:#ff6666}.dot.y{background:#ffcc66}.dot.g{background:#55ff66}
+.mhead span.t{margin-left:8px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--faint)}
+.mhead .x{margin-left:auto;color:var(--faint);font-size:16px}
+.mbody{padding:20px}
+.search{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--glass);border-radius:10px;padding:11px 14px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted)}
+.search b{color:var(--cyan);font-weight:500}
+.search .cursor{display:inline-block;width:7px;height:15px;background:var(--cyan);box-shadow:0 0 10px rgba(103,232,249,.8)}
+.hint{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint);margin:14px 2px 8px}
+.hint b{color:var(--cyan);font-weight:500}
+.list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:var(--glass);border-radius:12px;padding:12px 16px}
+.row .ic{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--vio);flex:none}
+.row .nm{min-width:0;flex:1}
+.row .nm b{font-family:"JetBrains Mono",monospace;font-size:13.5px;font-weight:500;display:block}
+.row .nm span{font-size:11.5px;color:var(--faint);font-family:"JetBrains Mono",monospace;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);text-align:right;flex:none}
+.meta .lv{color:var(--busy)}
+.add{flex:none;border-radius:8px;background:linear-gradient(90deg,var(--vio),var(--cyan));color:#0a0d1c;font-weight:700;font-size:12px;padding:7px 14px;font-family:"Space Grotesk",sans-serif}
+.added{flex:none;border-radius:8px;border:1px solid rgba(74,222,128,.4);color:var(--busy);font-weight:500;font-size:11.5px;padding:7px 12px;font-family:"JetBrains Mono",monospace}
+.gone{opacity:.55}
+.gone .warn{color:#fbbf24}
+.mfoot{padding:12px 20px;border-top:1px dashed var(--line);font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="dim">
+  <div class="wrap">
+    <header><span class="logo"><span class="grad">claude-deck</span></span></header>
+    <p class="sect">Live now</p><div class="ph"></div>
+    <p class="sect">Deck — 4 projects</p><div class="ph" style="height:180px"></div>
+  </div>
+</div>
+<div class="backdrop"></div>
+
+<div class="modal">
+  <div class="mhead">
+    <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="t">add project — scanned from ~/.claude/projects</span>
+    <span class="x">✕</span>
+  </div>
+  <div class="mbody">
+    <div class="search"><b>$</b> filter…<span class="cursor"></span></div>
+    <p class="hint"><b>7</b> projects found · sorted by last activity · already in deck are marked</p>
+    <div class="list">
+      <div class="row">
+        <span class="ic">go</span>
+        <span class="nm"><b>goldenrun</b><span>~/Documents/AiProject/goldenrun</span></span>
+        <span class="meta"><span class="lv">● live now</span><br>12 sessions · 6h ago</span>
+        <a class="add" href="#">+ Add</a>
+      </div>
+      <div class="row">
+        <span class="ic">ov</span>
+        <span class="nm"><b>overAll</b><span>~/Documents/AiProject/overAll</span></span>
+        <span class="meta">3 sessions · 2d ago</span>
+        <a class="add" href="#">+ Add</a>
+      </div>
+      <div class="row">
+        <span class="ic">gy</span>
+        <span class="nm"><b>gyo-demo</b><span>~/Documents/AiProject/gyo-demo</span></span>
+        <span class="meta">5 sessions · 3d ago</span>
+        <a class="add" href="#">+ Add</a>
+      </div>
+      <div class="row">
+        <span class="ic">bu</span>
+        <span class="nm"><b>builtin-asset-spac</b><span>~/Documents/AiProject/builtin-asset-spac</span></span>
+        <span class="meta">9 sessions · 5d ago</span>
+        <a class="add" href="#">+ Add</a>
+      </div>
+      <div class="row">
+        <span class="ic">ve</span>
+        <span class="nm"><b>vesta</b><span>~/Documents/AiProject/vesta</span></span>
+        <span class="meta">25 sessions · 2m ago</span>
+        <span class="added">✓ in deck</span>
+      </div>
+      <div class="row gone">
+        <span class="ic">gy</span>
+        <span class="nm"><b>gyoDemo</b><span class="warn">⚠ folder missing — history only</span></span>
+        <span class="meta">4 sessions · 3w ago</span>
+        <a class="add" href="#">+ Add</a>
+      </div>
+    </div>
+  </div>
+  <div class="mfoot"># deck config → ~/.claude-deck/config.json · nothing in ~/.claude is ever written</div>
+</div>
+</body>
+</html>
