@@ -51,15 +51,65 @@ export default function globalSetup(): void {
     history.map((h) => JSON.stringify({ ...h, pastedContents: {} })).join("\n") + "\n",
   );
 
-  const transcriptLine = JSON.stringify({ type: "user", message: { role: "user", content: "fixture" } }) + "\n";
-  for (const [proj, sid] of [
-    [rocket, SID_ROCKET],
-    [moon, SID_MOON],
-    [ghost, SID_GHOST],
-  ] as const) {
+  // rocket-shop gets a realistic transcript: user/assistant turns, tool chips,
+  // plus every noise shape the parser must skip (carrier, sidechain, snapshot).
+  const J = (o: object) => JSON.stringify(o);
+  const rocketThread = [
+    J({ type: "user", timestamp: "2026-07-01T21:42:00Z", message: { role: "user", content: "build the checkout page" } }),
+    J({
+      type: "assistant",
+      timestamp: "2026-07-01T21:43:00Z",
+      message: {
+        role: "assistant",
+        content: [
+          { type: "text", text: "On it — wiring the cart to the payment form now." },
+          { type: "tool_use", name: "Read", input: {} },
+          { type: "tool_use", name: "Edit", input: {} },
+        ],
+      },
+    }),
+    J({ type: "user", timestamp: "2026-07-01T21:44:00Z", message: { role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: "ok" }] } }),
+    J({ type: "user", isSidechain: true, timestamp: "2026-07-01T21:44:30Z", message: { role: "user", content: "subagent noise — must not render" } }),
+    J({ type: "file-history-snapshot", messageId: "m1", snapshot: {} }),
+    J({ type: "ai-title", aiTitle: "Fix rocket engine overheating", sessionId: SID_ROCKET }),
+    J({ type: "user", timestamp: "2026-07-02T09:00:00Z", message: { role: "user", content: "fix rocket engine overheating bug" } }),
+    J({
+      type: "assistant",
+      timestamp: "2026-07-02T09:01:00Z",
+      message: {
+        role: "assistant",
+        content: [
+          { type: "text", text: "Coolant loop was saturating — capped the burn rate and added a regression test." },
+          { type: "tool_use", name: "Bash", input: {} },
+        ],
+      },
+    }),
+  ];
+  // second rocket session with no history lines — title must come from ai-title
+  const SID_ROCKET2 = "44444444-dddd-4ddd-8ddd-444444444444";
+  const rocket2Thread = [
+    J({ type: "user", timestamp: "2026-06-20T10:00:00Z", message: { role: "user", content: "prototype the landing legs" } }),
+    J({ type: "ai-title", aiTitle: "Prototype landing legs", sessionId: SID_ROCKET2 }),
+  ];
+  const moonThread = [
+    J({ type: "user", timestamp: "2026-07-06T08:00:00Z", message: { role: "user", content: "write a post about moon dust" } }),
+    J({
+      type: "assistant",
+      timestamp: "2026-07-06T08:01:00Z",
+      message: { role: "assistant", content: [{ type: "text", text: "Drafted 600 words on regolith static cling." }] },
+    }),
+  ];
+
+  const transcripts: Array<[string, string, string[]]> = [
+    [rocket, SID_ROCKET, rocketThread],
+    [rocket, SID_ROCKET2, rocket2Thread],
+    [moon, SID_MOON, moonThread],
+    [ghost, SID_GHOST, [J({ type: "user", timestamp: "2026-06-17T08:00:00Z", message: { role: "user", content: "old ghost experiment" } })]],
+  ];
+  for (const [proj, sid, lines] of transcripts) {
     const dir = path.join(claudeDir, "projects", enc(proj));
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, `${sid}.jsonl`), transcriptLine);
+    fs.writeFileSync(path.join(dir, `${sid}.jsonl`), lines.join("\n") + "\n");
   }
 
   const sessions = [

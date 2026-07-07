@@ -1,10 +1,13 @@
 import fs from "node:fs";
+import path from "node:path";
 import { Hono } from "hono";
 import { liveCards, deckCards } from "./data/deck.js";
 import { scanProjects, rootChildren } from "./data/scan.js";
 import { readConfig, addProject, removeProject, addRoot } from "./data/config.js";
 import { readHistoryIndex } from "./data/history.js";
 import { expandHome, shortenHome } from "./data/paths.js";
+import { listProjectSessions, transcriptFile, SESSION_ID_RE } from "./data/project-sessions.js";
+import { tailReadJsonl, parseThread, countRenderable, extractAiTitle } from "./data/transcripts.js";
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -74,6 +77,55 @@ export function createApp(): Hono {
     }
     addRoot(rootPath);
     return c.json({ ok: true, path: rootPath }, 201);
+  });
+
+  app.get("/api/project", (c) => {
+    const projectPath = c.req.query("path");
+    if (!projectPath) return c.json({ error: "path is required" }, 400);
+    return c.json({
+      project: {
+        path: projectPath,
+        displayPath: shortenHome(projectPath),
+        name: path.basename(projectPath),
+        missing: !fs.existsSync(projectPath),
+      },
+      sessions: listProjectSessions(projectPath),
+    });
+  });
+
+  app.get("/api/session", (c) => {
+    const projectPath = c.req.query("path");
+    const id = c.req.query("id");
+    if (!projectPath || !id) return c.json({ error: "path and id are required" }, 400);
+    if (!SESSION_ID_RE.test(id)) return c.json({ error: "invalid session id" }, 400);
+
+    const file = transcriptFile(projectPath, id);
+    if (!fs.existsSync(file)) return c.json({ error: "transcript not found" }, 404);
+
+    const tail = tailReadJsonl(file);
+    const thread = parseThread(tail.lines);
+    const renderable = countRenderable(tail.lines);
+    const live = liveCards().find((s) => s.sessionId === id) ?? null;
+    const hist = readHistoryIndex().projects.get(projectPath)?.sessions.get(id);
+
+    return c.json({
+      meta: {
+        id,
+        shortId: `${id.slice(0, 4)}…${id.slice(-3)}`,
+        title: live?.name ?? extractAiTitle(tail.lines) ?? hist?.firstPrompt ?? id.slice(0, 8),
+        status: live?.status ?? null,
+        startedAt: live?.startedAt ?? hist?.firstTs ?? null,
+        lastTs: hist?.lastTs ?? null,
+        size: tail.size,
+        promptCount: hist?.promptCount ?? 0,
+        resumeCmd: `cd ${projectPath} && claude --resume ${id}`,
+        /** thread is a tail window — true when older messages were cut off */
+        truncated: !tail.complete,
+        shownCount: thread.length,
+        windowCount: renderable,
+      },
+      thread,
+    });
   });
 
   return app;
