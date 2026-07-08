@@ -80,7 +80,16 @@ export function Timeline({ navigate }: { navigate: (to: string) => void }) {
         ))}
 
         <footer className="mt-10 border-t border-line pt-[18px] pb-[26px] text-center font-mono text-[11.5px] text-faint">
-          claude-deck · local only (127.0.0.1) · reads ~/.claude read-only
+          claude-deck · local only (127.0.0.1) · reads ~/.claude read-only · © 2026{" "}
+          <a
+            href="https://github.com/LekTerMiNaL"
+            target="_blank"
+            rel="noreferrer"
+            className="text-muted hover:text-cyan"
+          >
+            LekTerMiNaL
+          </a>{" "}
+          · MIT
         </footer>
       </div>
     </>
