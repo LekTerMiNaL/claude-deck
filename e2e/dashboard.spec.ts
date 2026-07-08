@@ -23,6 +23,9 @@ test("empty deck: live sessions visible, deck empty state, dead pid dropped", as
   // deck is empty until the user adds projects
   await expect(page.getByTestId("deck-card")).toHaveCount(0);
   await expect(page.getByTestId("add-card")).toContainText("your deck is empty");
+
+  // footer carries the copyright + license credit
+  await expect(page.locator("footer")).toContainText("© 2026 LekTerMiNaL · MIT");
 });
 
 test("scan modal lists projects by last activity and marks the orphan", async ({ page }) => {
