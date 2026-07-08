@@ -23,7 +23,8 @@ clean and never commit anything containing the owner's transcript data.
 - Full gate as of Phase 3: 31 Vitest unit + 18 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
-- **Name**: `claude-deck`. Local git repo here; GitHub repo comes later (public, MIT).
+- **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck
+  (since 2026-07-08; owner-only write, contributions via fork + PR).
 - **Core UX**: the deck starts EMPTY. The user adds projects one by one — no auto-populating
   everything. (Owner was explicit about this.)
 - **How projects get added** (all three, owner was explicit that paths come from the user):
