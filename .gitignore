@@ -5,6 +5,8 @@ dist/
 # generated e2e fixture world + per-run config
 e2e/fixtures/
 e2e/.tmp-config/
+e2e/.tmp-config-bin/
+*.tgz
 test-results/
 playwright-report/
 

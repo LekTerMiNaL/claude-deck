@@ -56,11 +56,20 @@ Your transcripts never leave your machine:
 
 ## Install & run
 
+One command (builds from source on install, then opens your browser):
+
+```sh
+npx github:LekTerMiNaL/claude-deck
+```
+
+Options: `--port <n>` (default 5757) · `--no-open`.
+
+Or from a clone:
+
 ```sh
 git clone https://github.com/LekTerMiNaL/claude-deck.git
 cd claude-deck
-npm install
-npm run build
+npm install      # also builds (prepare)
 npm start        # → http://127.0.0.1:5757
 ```
 
