@@ -23,7 +23,11 @@ clean and never commit anything containing the owner's transcript data.
 - [x] Phase 4: Agent tree — session view surfaces the subagents a session spawned
       (Task agents with type+description, workflow runs), expandable subagent transcripts
       (spec: `docs/spec/phase-4.md`, merged 2026-07-09)
-- Full gate as of Phase 4: 38 Vitest unit + 21 Playwright e2e, all on synthesized fixtures
+- [x] Phase 5 (feature 1): "session finished" desktop notifications — the deck fires a
+      browser Notification when a busy session goes idle; opt-in bell toggle in the header
+      (localStorage + permission), client-side busy→idle detection between polls
+      (spec: `docs/spec/phase-5-notifications.md`, merged 2026-07-10)
+- Full gate as of Phase 5: 44 Vitest unit + 24 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck
