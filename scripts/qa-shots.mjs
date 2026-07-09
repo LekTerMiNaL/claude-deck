@@ -108,6 +108,15 @@ await desktop.goto(`${BASE}/timeline`);
 await desktop.waitForSelector('[data-testid="timeline-row"]');
 await desktop.screenshot({ path: `${OUT}/9-timeline.png`, fullPage: true });
 
+// 13. stats page (desktop + mobile)
+await desktop.goto(`${BASE}/stats`);
+await desktop.waitForSelector('[data-testid="chart-card"]');
+await desktop.waitForTimeout(300);
+await desktop.screenshot({ path: `${OUT}/13-stats.png`, fullPage: true });
+await mobile.goto(`${BASE}/stats`);
+await mobile.waitForSelector('[data-testid="chart-card"]');
+await mobile.screenshot({ path: `${OUT}/14-stats-mobile.png`, fullPage: true });
+
 // 12. search with a match highlighted
 await desktop.goto(`${BASE}/search?q=rocket`);
 await desktop.waitForSelector('[data-testid="search-row"]');

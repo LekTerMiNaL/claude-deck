@@ -3,6 +3,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { SessionView } from "./pages/SessionView";
 import { Timeline } from "./pages/Timeline";
 import { Search } from "./pages/Search";
+import { Stats } from "./pages/Stats";
 
 export function App() {
   const [route, navigate] = useRoute();
@@ -18,6 +19,9 @@ export function App() {
   }
   if (route.pathname === "/search") {
     return <Search navigate={navigate} initialQuery={route.query.get("q") ?? ""} />;
+  }
+  if (route.pathname === "/stats") {
+    return <Stats navigate={navigate} />;
   }
   return <Dashboard navigate={navigate} />;
 }

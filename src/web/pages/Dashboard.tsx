@@ -81,6 +81,13 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
             >
               ## timeline
             </button>
+            <button
+              data-testid="stats-link"
+              onClick={() => navigate("/stats")}
+              className="cursor-pointer font-mono text-xs text-faint hover:text-cyan"
+            >
+              ## stats
+            </button>
             <span
               data-testid="live-pill"
               className="flex items-center gap-2 rounded-full border border-busy/35 px-[14px] py-[6px] font-mono text-xs text-busy"

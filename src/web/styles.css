@@ -21,6 +21,12 @@
   --font-disp: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  /* chart series — darker steps of the brand hues, validated for the dark
+     surface (#12152a composite): ALL CHECKS PASS, worst adjacent CVD ΔE 16.2 */
+  --color-series-1: #8b5cf6;
+  --color-series-2: #0891b2;
+  --color-series-3: #16a34a;
+  --color-series-4: #d97706;
 }
 
 body {

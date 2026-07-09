@@ -114,6 +114,7 @@ export const api = {
     ),
   capabilities: () => get<{ openTerminal: boolean; summarize: boolean }>("/api/capabilities"),
   usage: () => get<UsageInfo>("/api/usage"),
+  stats: () => get<StatsPayload>("/api/stats"),
   timeline: (limit = 100) => get<{ entries: TimelineEntry[] }>(`/api/timeline?limit=${limit}`),
   search: (q: string, limit = 50) =>
     get<{ entries: TimelineEntry[]; total: number }>(
@@ -165,6 +166,14 @@ export interface UsageInfo {
   model: string | null;
   windows: UsageWindow[];
   stale: boolean;
+}
+
+export interface StatsPayload {
+  totals: { sessions: number; messages: number; prompts: number; toolCalls: number };
+  promptsPerDay: { date: string; count: number }[];
+  daily: { date: string; messages: number; tools: number }[];
+  tokens: { models: string[]; perDay: { date: string; byModel: Record<string, number> }[] };
+  hourCounts: number[];
 }
 
 export interface TimelineEntry {
