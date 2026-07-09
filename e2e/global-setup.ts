@@ -156,6 +156,25 @@ export default function globalSetup(): void {
   // fake open-terminal sink
   fs.rmSync(path.join(e2eDir, ".tmp-open-log"), { force: true });
 
+  // stats cache as Claude Code maintains it (dates keyed to "today" so the
+  // page always has fresh-looking columns)
+  const today = new Date(now).toISOString().slice(0, 10);
+  fs.writeFileSync(
+    path.join(claudeDir, "stats-cache.json"),
+    JSON.stringify({
+      version: 4,
+      totalSessions: 14,
+      totalMessages: 45438,
+      dailyActivity: [
+        { date: today, messageCount: 3103, sessionCount: 2, toolCallCount: 1072 },
+      ],
+      dailyModelTokens: [
+        { date: today, tokensByModel: { "claude-opus-4-8": 17_228_039, "claude-fable-5": 3_105_574 } },
+      ],
+      hourCounts: { "9": 3, "20": 5 },
+    }),
+  );
+
   // usage limits as the statusline bridge would persist them (fresh)
   fs.writeFileSync(
     path.join(configDir, "rate-limits.json"),
