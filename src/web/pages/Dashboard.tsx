@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, timeAgo, uptime, type DeckCard, type LiveCard, type UsageInfo } from "../lib/api";
 import { projectUrl } from "../lib/router";
 import { pollMs } from "../lib/config";
@@ -122,7 +122,7 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
         </p>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           {deck.map((p) => (
-            <ProjectCard key={p.path} p={p} navigate={navigate} />
+            <ProjectCard key={p.path} p={p} navigate={navigate} onRemoved={() => void refresh()} />
           ))}
           {loaded && (
             <button
@@ -220,9 +220,33 @@ function LiveNowCard({ s, navigate }: { s: LiveCard; navigate: (to: string) => v
   );
 }
 
-function ProjectCard({ p, navigate }: { p: DeckCard; navigate: (to: string) => void }) {
+function ProjectCard({
+  p,
+  navigate,
+  onRemoved,
+}: {
+  p: DeckCard;
+  navigate: (to: string) => void;
+  onRemoved: () => void;
+}) {
+  const [armed, setArmed] = useState(false);
+  const disarm = useRef<ReturnType<typeof setTimeout>>();
+
+  const removeClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // the card itself navigates
+    if (!armed) {
+      setArmed(true);
+      clearTimeout(disarm.current);
+      disarm.current = setTimeout(() => setArmed(false), 3000);
+      return;
+    }
+    clearTimeout(disarm.current);
+    await api.removeProject(p.path).catch(() => {});
+    onRemoved();
+  };
+
   return (
-    <button
+    <div
       data-testid="deck-card"
       onClick={() => navigate(projectUrl(p.path))}
       className="cursor-pointer overflow-hidden rounded-[18px] border border-line bg-glass text-left backdrop-blur-[8px] transition-colors hover:border-vio/40"
@@ -232,9 +256,19 @@ function ProjectCard({ p, navigate }: { p: DeckCard; navigate: (to: string) => v
         <span className="h-[9px] w-[9px] rounded-full bg-[#ffcc66]" />
         <span className="h-[9px] w-[9px] rounded-full bg-[#55ff66]" />
         <span className="ml-[6px] font-mono text-[11.5px] text-faint">{p.name}</span>
-        {p.liveCount > 0 && (
-          <span className="ml-auto font-mono text-[10.5px] text-busy">● {p.liveCount} live</span>
-        )}
+        <span className="ml-auto flex items-center gap-[10px]">
+          {p.liveCount > 0 && <span className="font-mono text-[10.5px] text-busy">● {p.liveCount} live</span>}
+          <button
+            data-testid="remove-project"
+            onClick={(e) => void removeClick(e)}
+            title="remove from deck (files stay untouched)"
+            className={`cursor-pointer font-mono text-[10.5px] ${
+              armed ? "text-[#fbbf24]" : "text-faint/60 hover:text-muted"
+            }`}
+          >
+            {armed ? "sure?" : "✕"}
+          </button>
+        </span>
       </div>
       <div className="w-full p-4 px-[18px]">
         <h3 className="font-disp text-lg font-bold">{p.name}</h3>
@@ -259,6 +293,6 @@ function ProjectCard({ p, navigate }: { p: DeckCard; navigate: (to: string) => v
           </p>
         )}
       </div>
-    </button>
+    </div>
   );
 }

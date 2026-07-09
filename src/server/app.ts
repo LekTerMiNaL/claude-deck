@@ -3,7 +3,7 @@ import path from "node:path";
 import { Hono } from "hono";
 import { liveCards, deckCards } from "./data/deck.js";
 import { scanProjects, rootChildren } from "./data/scan.js";
-import { readConfig, addProject, removeProject, addRoot } from "./data/config.js";
+import { readConfig, addProject, removeProject, addRoot, removeRoot } from "./data/config.js";
 import { readHistoryIndex } from "./data/history.js";
 import { expandHome, shortenHome } from "./data/paths.js";
 import { listProjectSessions, transcriptFile, SESSION_ID_RE } from "./data/project-sessions.js";
@@ -163,6 +163,13 @@ export function createApp(): Hono {
   app.get("/api/usage", (c) => c.json(readUsage()));
 
   app.get("/api/stats", (c) => c.json(buildStats()));
+
+  app.delete("/api/roots", async (c) => {
+    const body = (await c.req.json().catch(() => ({}))) as { path?: string };
+    if (!body.path) return c.json({ error: "path is required" }, 400);
+    removeRoot(body.path);
+    return c.json({ ok: true });
+  });
 
   app.get("/api/capabilities", (c) =>
     c.json({ openTerminal: canOpenTerminal(), summarize: true }),
