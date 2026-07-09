@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api, timeAgo, uptime, type DeckCard, type LiveCard } from "../lib/api";
+import { api, timeAgo, uptime, type DeckCard, type LiveCard, type UsageInfo } from "../lib/api";
 import { projectUrl } from "../lib/router";
 import { pollMs } from "../lib/config";
 import { useIdleNotifications } from "../hooks/useIdleNotifications";
@@ -8,6 +8,7 @@ import { AddModal } from "../components/AddModal";
 export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
   const [live, setLive] = useState<LiveCard[]>([]);
   const [deck, setDeck] = useState<DeckCard[]>([]);
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const notify = useIdleNotifications();
@@ -15,9 +16,10 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
 
   const refresh = useCallback(async () => {
     try {
-      const [l, d] = await Promise.all([api.live(), api.deck()]);
+      const [l, d, u] = await Promise.all([api.live(), api.deck(), api.usage()]);
       setLive(l.sessions);
       setDeck(d.projects);
+      setUsage(u);
       setLoaded(true);
       onPoll(l.sessions);
     } catch {
@@ -44,6 +46,7 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
             <span className="grad">claude-deck</span>
           </span>
           <div className="flex items-center gap-[14px]">
+            {usage?.configured && <UsagePill usage={usage} />}
             <button
               data-testid="notif-toggle"
               onClick={() => void notify.toggle()}
@@ -145,6 +148,40 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
 
       {modalOpen && <AddModal onClose={() => setModalOpen(false)} onChanged={() => void refresh()} />}
     </>
+  );
+}
+
+function UsagePill({ usage }: { usage: UsageInfo }) {
+  const tone = (p: number) => (p >= 90 ? "text-[#f87171]" : p >= 70 ? "text-[#fbbf24]" : "text-cyan");
+  const fill = (p: number) => (p >= 90 ? "bg-[#f87171]" : p >= 70 ? "bg-[#fbbf24]" : "bg-cyan");
+  const title = [
+    ...usage.windows.map(
+      (w) => `${w.label} ${Math.round(w.usedPercentage)}%${w.resetsAt ? ` · resets ${new Date(w.resetsAt).toLocaleString()}` : ""}`,
+    ),
+    usage.updatedAt ? `updated ${timeAgo(usage.updatedAt)}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return (
+    <span
+      data-testid="usage-pill"
+      title={title}
+      className={`flex items-center gap-[10px] rounded-full border border-line px-[14px] py-[6px] font-mono text-[11px] ${
+        usage.stale ? "opacity-55" : ""
+      }`}
+    >
+      {usage.windows.map((w) => (
+        <span key={w.key} className={`flex items-center gap-[6px] ${tone(w.usedPercentage)}`} data-testid={`usage-${w.label}`}>
+          {w.label}
+          <span className="h-[5px] w-9 overflow-hidden rounded-full bg-white/10">
+            <span className={`block h-full ${fill(w.usedPercentage)}`} style={{ width: `${w.usedPercentage}%` }} />
+          </span>
+          {Math.round(w.usedPercentage)}%
+        </span>
+      ))}
+      {usage.stale && <span className="text-faint">· stale</span>}
+    </span>
   );
 }
 

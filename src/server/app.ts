@@ -18,6 +18,7 @@ import {
 import { canOpenTerminal, openInTerminal } from "./data/terminal.js";
 import { timeline, historyEntries } from "./data/timeline.js";
 import { listSessionAgents, readSubagentThread, AGENT_ID_RE } from "./data/subagents.js";
+import { readUsage } from "./data/usage.js";
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -157,6 +158,8 @@ export function createApp(): Hono {
     if (!thread) return c.json({ error: "subagent transcript not found" }, 404);
     return c.json({ thread });
   });
+
+  app.get("/api/usage", (c) => c.json(readUsage()));
 
   app.get("/api/capabilities", (c) =>
     c.json({ openTerminal: canOpenTerminal(), summarize: true }),

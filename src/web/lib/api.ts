@@ -113,6 +113,7 @@ export const api = {
       `/api/session?path=${encodeURIComponent(path)}&id=${encodeURIComponent(id)}`,
     ),
   capabilities: () => get<{ openTerminal: boolean; summarize: boolean }>("/api/capabilities"),
+  usage: () => get<UsageInfo>("/api/usage"),
   timeline: (limit = 100) => get<{ entries: TimelineEntry[] }>(`/api/timeline?limit=${limit}`),
   search: (q: string, limit = 50) =>
     get<{ entries: TimelineEntry[]; total: number }>(
@@ -149,6 +150,21 @@ export interface WorkflowRun {
 export interface SessionAgents {
   taskAgents: AgentNode[];
   workflows: WorkflowRun[];
+}
+
+export interface UsageWindow {
+  key: string;
+  label: string;
+  usedPercentage: number;
+  resetsAt: string | null;
+}
+
+export interface UsageInfo {
+  configured: boolean;
+  updatedAt: number | null;
+  model: string | null;
+  windows: UsageWindow[];
+  stale: boolean;
 }
 
 export interface TimelineEntry {
