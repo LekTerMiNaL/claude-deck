@@ -5,7 +5,7 @@ import { encodeProjectPath, expandHome, shortenHome } from "./paths.js";
 import { readHistoryIndex, clearHistoryCache } from "./history.js";
 import { readLiveSessions } from "./sessions.js";
 import { scanProjects, rootChildren } from "./scan.js";
-import { readConfig, writeConfig, addProject, removeProject, addRoot } from "./config.js";
+import { readConfig, writeConfig, addProject, removeProject, addRoot, removeRoot } from "./config.js";
 import { deckCards, liveCards } from "./deck.js";
 import {
   makeWorld,
@@ -101,6 +101,16 @@ describe("config", () => {
     expect(readConfig()).toEqual({ projects: ["/a"], roots: ["/r"] });
     removeProject("/a");
     expect(readConfig().projects).toEqual([]);
+  });
+
+  it("removeRoot removes only the given root; unknown paths are a no-op", () => {
+    addProject("/a");
+    addRoot("/r1");
+    addRoot("/r2");
+    removeRoot("/r1");
+    expect(readConfig()).toEqual({ projects: ["/a"], roots: ["/r2"] });
+    removeRoot("/nope");
+    expect(readConfig().roots).toEqual(["/r2"]);
   });
 });
 

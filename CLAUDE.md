@@ -31,7 +31,14 @@ clean and never commit anything containing the owner's transcript data.
       substring over every prompt in history.jsonl (331 KB → no index needed; full-text
       transcript search = v2, needs an inverted index over 400+ MB), match highlight,
       deep links, query in URL (spec: `docs/spec/phase-5-search.md`, merged 2026-07-10)
-- Full gate as of Phase 5: 48 Vitest unit + 29 Playwright e2e, all on synthesized fixtures
+- [x] Phase 6: usage-limit bars (statusline bridge → `~/.claude-deck/rate-limits.json`,
+      owner's statusline configured), `npx github:LekTerMiNaL/claude-deck` bin (npm name
+      taken → package is `@lekterminal/claude-deck`, binary stays `claude-deck`; publish
+      to npm = owner's call), GitHub Actions CI (badge on README), `/stats` page
+      (validated chart palette #8b5cf6/#0891b2/#16a34a/#d97706 on #12152a), remove
+      project/root from deck UI (specs: `docs/spec/phase-5-*.md`, `phase-6-*.md`,
+      merged 2026-07-10)
+- Full gate as of Phase 6: 69 Vitest unit + 41 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck

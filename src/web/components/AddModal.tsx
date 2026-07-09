@@ -140,6 +140,14 @@ export function AddModal({ onClose, onChanged }: Props) {
             {filtered.map((item) => (
               <ScanRow key={item.encodedName} item={item} onAdd={addProject} />
             ))}
+            {roots.length > 0 && (
+              <p className="mx-[2px] mt-2 flex flex-wrap items-center gap-x-2 font-mono text-[11.5px] text-faint">
+                registered roots:
+                {roots.map((r) => (
+                  <RootChipRemove key={r.path} root={r} onRemove={() => act(() => api.removeRoot(r.path))} />
+                ))}
+              </p>
+            )}
             {rootRows.length > 0 && (
               <p className="mx-[2px] mt-2 font-mono text-[11.5px] text-faint">
                 from registered roots · no claude history yet
@@ -168,6 +176,28 @@ export function AddModal({ onClose, onChanged }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+function RootChipRemove({ root, onRemove }: { root: RootInfo; onRemove: () => void }) {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const t = setTimeout(() => setArmed(false), 3000);
+    return () => clearTimeout(t);
+  }, [armed]);
+  return (
+    <span data-testid="root-chip" className="inline-flex items-center gap-[6px] rounded-md border border-line px-2 py-[1px]">
+      <span className="text-muted">{root.displayPath}</span>
+      <button
+        data-testid="remove-root"
+        onClick={() => (armed ? onRemove() : setArmed(true))}
+        title="unregister this root (its already-added projects stay in the deck)"
+        className={`cursor-pointer ${armed ? "text-[#fbbf24]" : "text-faint hover:text-muted"}`}
+      >
+        {armed ? "sure?" : "✕"}
+      </button>
+    </span>
   );
 }
 

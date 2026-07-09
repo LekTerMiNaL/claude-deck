@@ -106,6 +106,7 @@ export const api = {
   addProject: (path: string) => send<{ ok: boolean }>("POST", "/api/deck", { path }),
   removeProject: (path: string) => send<{ ok: boolean }>("DELETE", "/api/deck", { path }),
   addRoot: (path: string) => send<{ ok: boolean }>("POST", "/api/roots", { path }),
+  removeRoot: (path: string) => send<{ ok: boolean }>("DELETE", "/api/roots", { path }),
   project: (path: string) =>
     get<{ project: ProjectInfo; sessions: ProjectSession[] }>(`/api/project?path=${encodeURIComponent(path)}`),
   session: (path: string, id: string) =>

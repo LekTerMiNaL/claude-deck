@@ -58,3 +58,10 @@ export function addRoot(rootPath: string): DeckConfig {
   }
   return config;
 }
+
+export function removeRoot(rootPath: string): DeckConfig {
+  const config = readConfig();
+  config.roots = config.roots.filter((r) => r !== rootPath);
+  writeConfig(config);
+  return config;
+}
