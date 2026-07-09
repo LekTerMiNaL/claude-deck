@@ -20,7 +20,10 @@ clean and never commit anything containing the owner's transcript data.
 - [x] Phase 3: AI summaries via `claude -p` (haiku, cached in `~/.claude-deck/summaries.json`),
       open-in-Terminal (macOS osascript, feature-detected), cross-project timeline at `/timeline`
       (spec: `docs/spec/phase-3.md`, merged 2026-07-08)
-- Full gate as of Phase 3: 31 Vitest unit + 18 Playwright e2e, all on synthesized fixtures
+- [x] Phase 4: Agent tree — session view surfaces the subagents a session spawned
+      (Task agents with type+description, workflow runs), expandable subagent transcripts
+      (spec: `docs/spec/phase-4.md`, merged 2026-07-09)
+- Full gate as of Phase 4: 38 Vitest unit + 21 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck

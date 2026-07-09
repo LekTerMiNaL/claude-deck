@@ -88,6 +88,20 @@ await desktop.goto(`${BASE}/timeline`);
 await desktop.waitForSelector('[data-testid="timeline-row"]');
 await desktop.screenshot({ path: `${OUT}/9-timeline.png`, fullPage: true });
 
+// 10. agent tree (rocket-shop's session has subagents), one expanded — desktop + mobile
+const rocketUrl = `${BASE}/project?path=${encodeURIComponent(path.resolve("e2e/fixtures/workspace/rocket-shop"))}`;
+await desktop.goto(rocketUrl);
+await desktop.waitForSelector('[data-testid="agent-tree"]');
+await desktop
+  .locator('[data-testid="agent-row"]', { hasText: "Build the checkout form" })
+  .getByTestId("agent-toggle")
+  .click();
+await desktop.waitForSelector('[data-testid="agent-thread"]');
+await desktop.screenshot({ path: `${OUT}/10-agent-tree.png`, fullPage: true });
+await mobile.goto(rocketUrl);
+await mobile.waitForSelector('[data-testid="agent-tree"]');
+await mobile.screenshot({ path: `${OUT}/11-agent-tree-mobile.png`, fullPage: true });
+
 await b.close();
 server.kill();
 fs.rmSync(configDir, { recursive: true, force: true });

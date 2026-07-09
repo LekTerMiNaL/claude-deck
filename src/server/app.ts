@@ -17,6 +17,7 @@ import {
 } from "./data/summary.js";
 import { canOpenTerminal, openInTerminal } from "./data/terminal.js";
 import { timeline } from "./data/timeline.js";
+import { listSessionAgents, readSubagentThread, AGENT_ID_RE } from "./data/subagents.js";
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -135,6 +136,26 @@ export function createApp(): Hono {
       },
       thread,
     });
+  });
+
+  app.get("/api/session/agents", (c) => {
+    const projectPath = c.req.query("path");
+    const id = c.req.query("id");
+    if (!projectPath || !id) return c.json({ error: "path and id are required" }, 400);
+    if (!SESSION_ID_RE.test(id)) return c.json({ error: "invalid session id" }, 400);
+    return c.json(listSessionAgents(projectPath, id));
+  });
+
+  app.get("/api/subagent", (c) => {
+    const projectPath = c.req.query("path");
+    const id = c.req.query("id");
+    const agent = c.req.query("agent");
+    if (!projectPath || !id || !agent) return c.json({ error: "path, id and agent are required" }, 400);
+    if (!SESSION_ID_RE.test(id)) return c.json({ error: "invalid session id" }, 400);
+    if (!AGENT_ID_RE.test(agent)) return c.json({ error: "invalid agent id" }, 400);
+    const thread = readSubagentThread(projectPath, id, agent);
+    if (!thread) return c.json({ error: "subagent transcript not found" }, 404);
+    return c.json({ thread });
   });
 
   app.get("/api/capabilities", (c) =>
