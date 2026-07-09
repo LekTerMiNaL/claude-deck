@@ -23,6 +23,19 @@ export interface UsageInfo {
 
 const STALE_MS = 10 * 60 * 1000;
 
+/**
+ * resets_at arrives as unix seconds on this machine (verified live), but the
+ * docs-era shape was an ISO string — accept both, plus epoch millis.
+ */
+function toIso(v: unknown): string | null {
+  if (typeof v === "string") return v;
+  if (typeof v === "number" && Number.isFinite(v) && v > 0) {
+    const ms = v > 1e12 ? v : v * 1000;
+    return new Date(ms).toISOString();
+  }
+  return null;
+}
+
 function labelFor(key: string): string {
   if (/five|5/.test(key)) return "5h";
   if (/seven|7|week/.test(key)) return "week";
@@ -47,7 +60,7 @@ export function normalizeRateLimits(raw: unknown): UsageWindow[] {
       key,
       label: labelFor(key),
       usedPercentage: Math.min(100, Math.max(0, win.used_percentage)),
-      resetsAt: typeof win.resets_at === "string" ? win.resets_at : null,
+      resetsAt: toIso(win.resets_at),
     });
   }
   return windows.sort((a, b) => (LABEL_ORDER[a.label] ?? 9) - (LABEL_ORDER[b.label] ?? 9));
