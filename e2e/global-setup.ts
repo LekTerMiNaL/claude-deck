@@ -112,6 +112,37 @@ export default function globalSetup(): void {
     fs.writeFileSync(path.join(dir, `${sid}.jsonl`), lines.join("\n") + "\n");
   }
 
+  // rocket-shop's live session spawned subagents: 2 Task agents + a workflow of 2.
+  // Every line isSidechain (that's what a subagent transcript looks like on disk).
+  const sJ = (o: object) => JSON.stringify({ isSidechain: true, ...o });
+  const sUser = (text: string) => sJ({ type: "user", timestamp: "2026-07-02T09:05:00Z", message: { role: "user", content: text } });
+  const sAsst = (blocks: object[]) =>
+    sJ({ type: "assistant", timestamp: "2026-07-02T09:06:00Z", message: { role: "assistant", content: blocks } });
+
+  const subBase = path.join(claudeDir, "projects", enc(rocket), SID_ROCKET, "subagents");
+  const writeAgent = (rel: string, agentId: string, meta: object, lines: string[]) => {
+    const d = path.join(subBase, rel);
+    fs.mkdirSync(d, { recursive: true });
+    fs.writeFileSync(path.join(d, `${agentId}.jsonl`), lines.join("\n") + "\n");
+    fs.writeFileSync(path.join(d, `${agentId}.meta.json`), JSON.stringify(meta));
+  };
+  writeAgent(".", "agent-a001", { agentType: "builder", description: "Build the checkout form" }, [
+    sUser("Build the checkout form with the payment fields"),
+    sAsst([{ type: "text", text: "Built the form and wired validation." }, { type: "tool_use", name: "Edit", input: {} }]),
+  ]);
+  writeAgent(".", "agent-a002", { agentType: "reviewer", description: "Review the checkout form" }, [
+    sUser("Review the checkout form for bugs"),
+    sAsst([{ type: "text", text: "Found one edge case with empty carts; otherwise solid." }]),
+  ]);
+  writeAgent("workflows/wf_check01", "agent-b001", { agentType: "workflow-subagent" }, [
+    sUser("Find correctness bugs in the burn-rate cap"),
+    sAsst([{ type: "tool_use", name: "Grep", input: {} }]),
+  ]);
+  writeAgent("workflows/wf_check01", "agent-b002", { agentType: "workflow-subagent" }, [
+    sUser("Verify the reported burn-rate bug is real"),
+    sAsst([{ type: "text", text: "Confirmed — reproduces at throttle 0." }]),
+  ]);
+
   // fake `claude` CLI for summary e2e: records each call, echoes a canned summary
   const fakeBin = path.join(e2eDir, "fixtures", "fake-claude.sh");
   const callLog = path.join(e2eDir, ".tmp-claude-calls");

@@ -118,7 +118,34 @@ export const api = {
     send<{ summary: string; cached: boolean }>("POST", "/api/session/summary", { path, id }),
   openTerminal: (path: string, id: string) =>
     send<{ ok: boolean }>("POST", "/api/open-terminal", { path, id }),
+  agents: (path: string, id: string) =>
+    get<SessionAgents>(`/api/session/agents?path=${encodeURIComponent(path)}&id=${encodeURIComponent(id)}`),
+  subagent: (path: string, id: string, agent: string) =>
+    get<{ thread: ThreadMessage[] }>(
+      `/api/subagent?path=${encodeURIComponent(path)}&id=${encodeURIComponent(id)}&agent=${encodeURIComponent(agent)}`,
+    ),
 };
+
+export interface AgentNode {
+  agentId: string;
+  agentType: string;
+  description: string;
+  firstPrompt: string;
+  messageCount: number;
+  toolCount: number;
+  size: number;
+  finalText: string;
+}
+
+export interface WorkflowRun {
+  wfId: string;
+  agents: AgentNode[];
+}
+
+export interface SessionAgents {
+  taskAgents: AgentNode[];
+  workflows: WorkflowRun[];
+}
 
 export interface TimelineEntry {
   ts: number;

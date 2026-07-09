@@ -70,13 +70,20 @@ interface ContentBlock {
  * Reduce raw transcript lines to renderable messages: user text, assistant
  * text, tool_use names as chips. Skips sidechain (subagent) lines, meta
  * lines, non-message types, and user lines that only carry tool_results.
+ *
+ * A subagent's OWN transcript is entirely sidechain lines, so pass
+ * `includeSidechain: true` when rendering one of those.
  */
-export function parseThread(rawLines: unknown[], limit = 80): ThreadMessage[] {
+export function parseThread(
+  rawLines: unknown[],
+  limit = 80,
+  opts: { includeSidechain?: boolean } = {},
+): ThreadMessage[] {
   const out: ThreadMessage[] = [];
   for (const raw of rawLines) {
     const line = raw as RawLine;
     if (line.type !== "user" && line.type !== "assistant") continue;
-    if (line.isSidechain || line.isMeta) continue;
+    if ((line.isSidechain && !opts.includeSidechain) || line.isMeta) continue;
     const content = line.message?.content;
 
     let text = "";
@@ -124,4 +131,24 @@ export function extractAiTitle(rawLines: unknown[]): string | null {
 /** Count how many renderable messages the tail window holds (before limit). */
 export function countRenderable(rawLines: unknown[]): number {
   return parseThread(rawLines, Number.MAX_SAFE_INTEGER).length;
+}
+
+/**
+ * First user text in a transcript — for a subagent transcript this is the
+ * task/prompt it was given. Reads sidechain lines (subagents are all sidechain).
+ */
+export function firstUserText(rawLines: unknown[]): string {
+  for (const raw of rawLines) {
+    const line = raw as RawLine;
+    if (line.type !== "user") continue;
+    const content = line.message?.content;
+    if (typeof content === "string") {
+      if (content.trim()) return content.trim();
+    } else if (Array.isArray(content)) {
+      for (const block of content as ContentBlock[]) {
+        if (block.type === "text" && block.text?.trim()) return block.text.trim();
+      }
+    }
+  }
+  return "";
 }
