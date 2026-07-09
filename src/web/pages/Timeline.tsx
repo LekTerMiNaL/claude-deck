@@ -29,6 +29,10 @@ export function Timeline({ navigate }: { navigate: (to: string) => void }) {
             <span className="grad">claude-deck</span>
           </button>
           <span className="font-mono text-xs text-faint">
+            <button onClick={() => navigate("/search")} className="cursor-pointer hover:text-cyan">
+              $ search
+            </button>{" "}
+            ·{" "}
             <button onClick={() => navigate("/")} className="cursor-pointer hover:text-muted">
               deck
             </button>{" "}

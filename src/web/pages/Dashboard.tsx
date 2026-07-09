@@ -65,6 +65,13 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
               {notify.state === "on" ? "🔔 notify" : notify.state === "blocked" ? "🔕 blocked" : "🔕 notify"}
             </button>
             <button
+              data-testid="search-link"
+              onClick={() => navigate("/search")}
+              className="cursor-pointer font-mono text-xs text-faint hover:text-cyan"
+            >
+              $ search
+            </button>
+            <button
               data-testid="timeline-link"
               onClick={() => navigate("/timeline")}
               className="cursor-pointer font-mono text-xs text-faint hover:text-cyan"

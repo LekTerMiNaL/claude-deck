@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { getCachedSummary, cacheSummary, buildSummaryInput, summaryPrompt } from "./summary.js";
 import { shellQuote, resumeCommand, openTerminalScript } from "./terminal.js";
-import { timeline } from "./timeline.js";
+import { timeline, historyEntries } from "./timeline.js";
 import { addProject } from "./config.js";
 import { makeWorld, writeHistory, SID, type FixtureWorld } from "./test-helpers.js";
 import type { ThreadMessage } from "./transcripts.js";
@@ -109,5 +109,46 @@ describe("timeline", () => {
 
   it("returns [] with no history file", () => {
     expect(timeline()).toEqual([]);
+  });
+});
+
+describe("historyEntries search", () => {
+  const seed = () =>
+    writeHistory(world, [
+      { display: "แก้ bug ราคาทองแล้วกราฟไม่อัปเดต", timestamp: 1000, project: "/w/vesta", sessionId: SID.a1 },
+      { display: "Fix the GOLD price cache", timestamp: 2000, project: "/w/vesta", sessionId: SID.a1 },
+      { display: "write moon dust post", timestamp: 3000, project: "/w/moon", sessionId: SID.b1 },
+      { display: "ราคาทอง realtime ผ่าน websocket", timestamp: 4000, project: "/w/gold-api", sessionId: SID.c1 },
+    ]);
+
+  it("matches case-insensitively and returns newest first", () => {
+    seed();
+    const { entries, total } = historyEntries({ query: "gold", limit: 10 });
+    expect(total).toBe(1);
+    expect(entries[0]?.display).toBe("Fix the GOLD price cache");
+  });
+
+  it("matches Thai substrings across projects", () => {
+    seed();
+    const { entries, total } = historyEntries({ query: "ราคาทอง", limit: 10 });
+    expect(total).toBe(2);
+    expect(entries.map((e) => e.ts)).toEqual([4000, 1000]); // newest first
+    expect(entries.map((e) => e.projectName).sort()).toEqual(["gold-api", "vesta"]);
+  });
+
+  it("caps entries by limit while total counts all matches", () => {
+    seed();
+    const { entries, total } = historyEntries({ query: "ราคาทอง", limit: 1 });
+    expect(entries).toHaveLength(1);
+    expect(entries[0]?.ts).toBe(4000); // the newest match survives the cap
+    expect(total).toBe(2);
+  });
+
+  it("no query behaves like timeline; missing file is empty", () => {
+    seed();
+    expect(historyEntries({ limit: 2 }).entries.map((e) => e.ts)).toEqual([4000, 3000]);
+    world.cleanup();
+    world = makeWorld();
+    expect(historyEntries({ query: "x", limit: 5 })).toEqual({ entries: [], total: 0 });
   });
 });

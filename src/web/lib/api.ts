@@ -114,6 +114,10 @@ export const api = {
     ),
   capabilities: () => get<{ openTerminal: boolean; summarize: boolean }>("/api/capabilities"),
   timeline: (limit = 100) => get<{ entries: TimelineEntry[] }>(`/api/timeline?limit=${limit}`),
+  search: (q: string, limit = 50) =>
+    get<{ entries: TimelineEntry[]; total: number }>(
+      `/api/search?q=${encodeURIComponent(q)}&limit=${limit}`,
+    ),
   summarize: (path: string, id: string) =>
     send<{ summary: string; cached: boolean }>("POST", "/api/session/summary", { path, id }),
   openTerminal: (path: string, id: string) =>
