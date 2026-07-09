@@ -1,13 +1,42 @@
 {
-  "name": "claude-deck",
+  "name": "@lekterminal/claude-deck",
   "version": "0.1.0",
-  "description": "Local dashboard for Claude Code sessions across projects",
+  "description": "Local dashboard for Claude Code sessions across projects — live status, transcripts, resume, AI summaries. 127.0.0.1 only.",
   "type": "module",
   "license": "MIT",
-  "private": true,
+  "bin": {
+    "claude-deck": "bin/claude-deck.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "scripts/statusline-bridge.mjs",
+    "docs/screenshots"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LekTerMiNaL/claude-deck.git"
+  },
+  "homepage": "https://github.com/LekTerMiNaL/claude-deck#readme",
+  "bugs": "https://github.com/LekTerMiNaL/claude-deck/issues",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "dashboard",
+    "sessions",
+    "local-first",
+    "developer-tools"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "concurrently -k -n server,web -c cyan,magenta \"tsx watch src/server/index.ts\" \"vite\"",
     "build": "vite build && tsc -p tsconfig.server.json",
+    "prepare": "npm run build",
     "start": "node dist/server/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
