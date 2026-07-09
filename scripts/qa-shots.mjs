@@ -17,6 +17,20 @@ globalSetup();
 const configDir = path.resolve("e2e/.tmp-config-qa");
 fs.rmSync(configDir, { recursive: true, force: true });
 
+// usage pill data as the statusline bridge would write it
+fs.mkdirSync(configDir, { recursive: true });
+fs.writeFileSync(
+  path.join(configDir, "rate-limits.json"),
+  JSON.stringify({
+    updatedAt: Date.now(),
+    model: "Fixture Model",
+    rate_limits: {
+      five_hour: { used_percentage: 34, resets_at: "2026-07-10T05:00:00Z" },
+      seven_day: { used_percentage: 81, resets_at: "2026-07-14T00:00:00Z" },
+    },
+  }),
+);
+
 const server = spawn("node", ["dist/server/index.js"], {
   env: {
     ...process.env,

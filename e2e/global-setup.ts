@@ -156,6 +156,19 @@ export default function globalSetup(): void {
   // fake open-terminal sink
   fs.rmSync(path.join(e2eDir, ".tmp-open-log"), { force: true });
 
+  // usage limits as the statusline bridge would persist them (fresh)
+  fs.writeFileSync(
+    path.join(configDir, "rate-limits.json"),
+    JSON.stringify({
+      updatedAt: now,
+      model: "Fixture Model",
+      rate_limits: {
+        five_hour: { used_percentage: 34, resets_at: "2026-07-10T05:00:00Z" },
+        seven_day: { used_percentage: 81, resets_at: "2026-07-14T00:00:00Z" },
+      },
+    }),
+  );
+
   const sessions = [
     { pid: 111111, sessionId: SID_ROCKET, cwd: rocket, name: "rocket-shop-7", status: "busy", startedAt: now - 8_040_000, updatedAt: now },
     { pid: 222222, sessionId: SID_MOON, cwd: moon, name: "moon-blog-2", status: "idle", startedAt: now - 3_600_000, updatedAt: now },

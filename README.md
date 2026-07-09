@@ -24,6 +24,12 @@ history, full transcripts, and a one-click way to resume any session.
   (Haiku). Cached; re-runs only when the transcript grows.
 - **Timeline** — one reverse-chronological feed of your prompts across *all* projects,
   grouped by day. "What was I doing yesterday, everywhere?"
+- **Search** — grep every prompt you ever typed, across all projects, with highlighted
+  matches and deep links into the exact session.
+- **Finished notifications** — opt-in bell: get a desktop notification the moment a
+  busy session goes idle.
+- **Usage limits in the header** — see your 5-hour and weekly rate-limit usage as
+  little bars (needs a one-line statusline setup, below).
 
 | Session view | Timeline | Add project |
 |---|---|---|
@@ -78,6 +84,23 @@ Set `CLAUDE_DECK_PORT` to change the port.
 3. Click a project card to browse its sessions and transcripts.
 4. Use **copy** / **terminal ⧉** in a session header to resume it, **✦ summarize**
    for an AI recap, and **## timeline** in the header for the cross-project feed.
+
+## Usage limits in the header (optional)
+
+Claude Code feeds rate-limit data (5-hour + weekly windows) to statusline scripts.
+claude-deck ships a tiny bridge that persists it — to claude-deck's own config dir,
+never into `~/.claude` — and doubles as a compact terminal statusline
+(`Opus 4.8 · 5h 34% · wk 12%`). Enable it by adding to `~/.claude/settings.json`:
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "node /path/to/claude-deck/scripts/statusline-bridge.mjs"
+}
+```
+
+The dashboard header then shows the usage bars (they update while any Claude Code
+session is running). Remove the key to turn it all off.
 
 ## Development
 
