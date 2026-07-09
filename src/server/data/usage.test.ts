@@ -35,6 +35,19 @@ describe("normalizeRateLimits", () => {
     ]);
   });
 
+  it("accepts resets_at as unix seconds, epoch millis or ISO string", () => {
+    const windows = normalizeRateLimits({
+      five_hour: { used_percentage: 50, resets_at: 1783637400 }, // seconds (real shape)
+      seven_day: { used_percentage: 5, resets_at: 1783637400000 }, // millis
+      other: { used_percentage: 1, resets_at: "2026-07-14T00:00:00Z" }, // ISO
+      bad: { used_percentage: 2, resets_at: { nested: true } },
+    });
+    expect(windows.find((w) => w.key === "five_hour")?.resetsAt).toBe("2026-07-09T15:30:00.000Z");
+    expect(windows.find((w) => w.key === "seven_day")?.resetsAt).toBe("2026-07-09T15:30:00.000Z");
+    expect(windows.find((w) => w.key === "other")?.resetsAt).toBe("2026-07-14T00:00:00Z");
+    expect(windows.find((w) => w.key === "bad")?.resetsAt).toBeNull();
+  });
+
   it("drops junk: non-numeric, missing used_percentage, non-object input", () => {
     expect(normalizeRateLimits(null)).toEqual([]);
     expect(normalizeRateLimits("x")).toEqual([]);
