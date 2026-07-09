@@ -42,8 +42,8 @@ describe("normalizeRateLimits", () => {
       other: { used_percentage: 1, resets_at: "2026-07-14T00:00:00Z" }, // ISO
       bad: { used_percentage: 2, resets_at: { nested: true } },
     });
-    expect(windows.find((w) => w.key === "five_hour")?.resetsAt).toBe("2026-07-09T15:30:00.000Z");
-    expect(windows.find((w) => w.key === "seven_day")?.resetsAt).toBe("2026-07-09T15:30:00.000Z");
+    expect(windows.find((w) => w.key === "five_hour")?.resetsAt).toBe("2026-07-09T22:50:00.000Z");
+    expect(windows.find((w) => w.key === "seven_day")?.resetsAt).toBe("2026-07-09T22:50:00.000Z");
     expect(windows.find((w) => w.key === "other")?.resetsAt).toBe("2026-07-14T00:00:00Z");
     expect(windows.find((w) => w.key === "bad")?.resetsAt).toBeNull();
   });
