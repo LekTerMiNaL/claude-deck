@@ -10,8 +10,7 @@ import {
 import { projectUrl } from "../lib/router";
 import { Message, formatSize } from "../components/Message";
 import { AgentTree } from "../components/AgentTree";
-
-const POLL_MS = 5000;
+import { pollMs } from "../lib/config";
 
 interface Props {
   projectPath: string;
@@ -59,7 +58,7 @@ export function SessionView({ projectPath, initialSessionId, navigate }: Props) 
 
   useEffect(() => {
     void refreshProject();
-    const t = setInterval(() => void refreshProject(), POLL_MS);
+    const t = setInterval(() => void refreshProject(), pollMs());
     return () => clearInterval(t);
   }, [refreshProject]);
 
@@ -69,7 +68,7 @@ export function SessionView({ projectPath, initialSessionId, navigate }: Props) 
     setSummaryError("");
     setOpened(false);
     void refreshSession();
-    const t = setInterval(() => void refreshSession(), POLL_MS);
+    const t = setInterval(() => void refreshSession(), pollMs());
     return () => clearInterval(t);
   }, [refreshSession]);
 

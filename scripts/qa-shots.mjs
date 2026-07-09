@@ -43,9 +43,15 @@ const b = await chromium.launch();
 const desktop = await b.newPage({ viewport: { width: 1280, height: 900 } });
 const mobile = await b.newPage({ viewport: { width: 390, height: 844 } });
 
-// 1. empty deck
+// 1. empty deck (with notifications enabled so the bell shows its 🔔 state)
+await desktop.addInitScript(`
+  window.__notifs = [];
+  class FakeNotification { static permission = "granted"; static requestPermission(){return Promise.resolve("granted");} constructor(){} }
+  window.Notification = FakeNotification;
+`);
 await desktop.goto(BASE);
 await desktop.waitForSelector('[data-testid="add-card"]');
+await desktop.getByTestId("notif-toggle").click();
 await desktop.screenshot({ path: `${OUT}/1-dashboard-empty.png`, fullPage: true });
 
 // 2. add modal (scan list with orphan)

@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { api, timeAgo, uptime, type DeckCard, type LiveCard } from "../lib/api";
 import { projectUrl } from "../lib/router";
+import { pollMs } from "../lib/config";
+import { useIdleNotifications } from "../hooks/useIdleNotifications";
 import { AddModal } from "../components/AddModal";
-
-const POLL_MS = 5000;
 
 export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
   const [live, setLive] = useState<LiveCard[]>([]);
   const [deck, setDeck] = useState<DeckCard[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const notify = useIdleNotifications();
+  const { onPoll } = notify; // stable useCallback — keep refresh identity steady
 
   const refresh = useCallback(async () => {
     try {
@@ -17,14 +19,15 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
       setLive(l.sessions);
       setDeck(d.projects);
       setLoaded(true);
+      onPoll(l.sessions);
     } catch {
       // server briefly unavailable — keep last known state, next poll retries
     }
-  }, []);
+  }, [onPoll]);
 
   useEffect(() => {
     void refresh();
-    const t = setInterval(() => void refresh(), POLL_MS);
+    const t = setInterval(() => void refresh(), pollMs());
     return () => clearInterval(t);
   }, [refresh]);
 
@@ -41,6 +44,26 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
             <span className="grad">claude-deck</span>
           </span>
           <div className="flex items-center gap-[14px]">
+            <button
+              data-testid="notif-toggle"
+              onClick={() => void notify.toggle()}
+              title={
+                notify.state === "blocked"
+                  ? "notifications blocked — enable them for this site in your browser settings"
+                  : notify.state === "on"
+                    ? "notify me when a busy session goes idle — on"
+                    : "notify me when a busy session goes idle"
+              }
+              className={`cursor-pointer font-mono text-xs ${
+                notify.state === "on"
+                  ? "text-cyan"
+                  : notify.state === "blocked"
+                    ? "text-[#fbbf24]"
+                    : "text-faint hover:text-cyan"
+              }`}
+            >
+              {notify.state === "on" ? "🔔 notify" : notify.state === "blocked" ? "🔕 blocked" : "🔕 notify"}
+            </button>
             <button
               data-testid="timeline-link"
               onClick={() => navigate("/timeline")}
