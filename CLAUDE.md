@@ -27,7 +27,11 @@ clean and never commit anything containing the owner's transcript data.
       browser Notification when a busy session goes idle; opt-in bell toggle in the header
       (localStorage + permission), client-side busy→idle detection between polls
       (spec: `docs/spec/phase-5-notifications.md`, merged 2026-07-10)
-- Full gate as of Phase 5: 44 Vitest unit + 24 Playwright e2e, all on synthesized fixtures
+- [x] Phase 5 (feature 2): cross-project prompt search at `/search` — case-insensitive
+      substring over every prompt in history.jsonl (331 KB → no index needed; full-text
+      transcript search = v2, needs an inverted index over 400+ MB), match highlight,
+      deep links, query in URL (spec: `docs/spec/phase-5-search.md`, merged 2026-07-10)
+- Full gate as of Phase 5: 48 Vitest unit + 29 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck

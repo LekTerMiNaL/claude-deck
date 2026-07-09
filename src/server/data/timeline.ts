@@ -21,24 +21,32 @@ interface HistoryLine {
   sessionId?: string;
 }
 
+export interface HistorySearchResult {
+  entries: TimelineEntry[];
+  /** Matches in the whole file, even beyond `limit`. */
+  total: number;
+}
+
 /**
- * Most recent prompts across ALL projects, newest first. Reads history.jsonl
- * directly (it's ordered append-only) instead of the aggregated index so we
- * keep individual entries.
+ * Walk history.jsonl newest-first (it's append-only), optionally filtering by
+ * a case-insensitive substring of the prompt. Substring — not word-boundary —
+ * matching, because Thai has no spaces between words. `entries` is capped by
+ * `limit`; `total` keeps counting all matches for "showing X of N".
  */
-export function timeline(limit = 100): TimelineEntry[] {
+export function historyEntries(opts: { query?: string; limit: number }): HistorySearchResult {
   const file = path.join(claudeDir(), "history.jsonl");
   let raw: string;
   try {
     raw = fs.readFileSync(file, "utf8");
   } catch {
-    return [];
+    return { entries: [], total: 0 };
   }
+  const q = opts.query?.toLowerCase() ?? "";
   const config = readConfig();
-  const out: TimelineEntry[] = [];
+  const entries: TimelineEntry[] = [];
+  let total = 0;
   const lines = raw.split("\n");
-  // append-only file → walk from the end, stop once we have enough
-  for (let i = lines.length - 1; i >= 0 && out.length < limit; i--) {
+  for (let i = lines.length - 1; i >= 0; i--) {
     const line = lines[i];
     if (!line?.trim()) continue;
     let entry: HistoryLine;
@@ -49,16 +57,28 @@ export function timeline(limit = 100): TimelineEntry[] {
     }
     const { display, timestamp, project, sessionId } = entry;
     if (!display || !timestamp || !project || !sessionId) continue;
-    out.push({
-      ts: timestamp,
-      display,
-      project,
-      projectName: path.basename(project),
-      displayPath: shortenHome(project),
-      sessionId,
-      inDeck: config.projects.includes(project),
-    });
+    if (q && !display.toLowerCase().includes(q)) continue;
+    total++;
+    if (entries.length < opts.limit) {
+      entries.push({
+        ts: timestamp,
+        display,
+        project,
+        projectName: path.basename(project),
+        displayPath: shortenHome(project),
+        sessionId,
+        inDeck: config.projects.includes(project),
+      });
+    } else if (!q) {
+      break; // timeline mode: nothing past limit is needed, stop early
+    }
   }
   // history.jsonl is normally time-ordered; enforce it in case of clock skew
-  return out.sort((a, b) => b.ts - a.ts);
+  entries.sort((a, b) => b.ts - a.ts);
+  return { entries, total };
+}
+
+/** Most recent prompts across ALL projects, newest first. */
+export function timeline(limit = 100): TimelineEntry[] {
+  return historyEntries({ limit }).entries;
 }

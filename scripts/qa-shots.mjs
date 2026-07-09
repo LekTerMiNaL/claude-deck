@@ -94,6 +94,11 @@ await desktop.goto(`${BASE}/timeline`);
 await desktop.waitForSelector('[data-testid="timeline-row"]');
 await desktop.screenshot({ path: `${OUT}/9-timeline.png`, fullPage: true });
 
+// 12. search with a match highlighted
+await desktop.goto(`${BASE}/search?q=rocket`);
+await desktop.waitForSelector('[data-testid="search-row"]');
+await desktop.screenshot({ path: `${OUT}/12-search.png`, fullPage: true });
+
 // 10. agent tree (rocket-shop's session has subagents), one expanded — desktop + mobile
 const rocketUrl = `${BASE}/project?path=${encodeURIComponent(path.resolve("e2e/fixtures/workspace/rocket-shop"))}`;
 await desktop.goto(rocketUrl);
