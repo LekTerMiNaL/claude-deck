@@ -1,5 +1,7 @@
 # ~/claude-deck
 
+[![ci](https://github.com/LekTerMiNaL/claude-deck/actions/workflows/ci.yml/badge.svg)](https://github.com/LekTerMiNaL/claude-deck/actions/workflows/ci.yml)
+
 **A local dashboard for your Claude Code sessions — across every project.**
 
 If you run Claude Code in several terminals at once, you know the feeling: which
