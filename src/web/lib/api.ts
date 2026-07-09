@@ -142,6 +142,9 @@ export interface AgentNode {
   toolCount: number;
   size: number;
   finalText: string;
+  startedTs: number;
+  lastTs: number;
+  active: boolean;
 }
 
 export interface WorkflowRun {
