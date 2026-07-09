@@ -15,7 +15,14 @@ export interface AgentNode {
   toolCount: number;
   size: number;
   finalText: string;
+  /** File birth/modify times — spawn order + "still writing" detection. */
+  startedTs: number;
+  lastTs: number;
+  /** Transcript written to in the last 2 minutes → probably still running. */
+  active: boolean;
 }
+
+const ACTIVE_WINDOW_MS = 2 * 60 * 1000;
 
 export interface WorkflowRun {
   wfId: string;
@@ -45,7 +52,7 @@ function readMeta(metaFile: string): AgentMeta {
 }
 
 /** Build an AgentNode from a subagent transcript file + its sibling .meta.json. */
-function buildNode(dir: string, agentId: string): AgentNode {
+function buildNode(dir: string, agentId: string, now = Date.now()): AgentNode {
   const file = path.join(dir, `${agentId}.jsonl`);
   const meta = readMeta(path.join(dir, `${agentId}.meta.json`));
 
@@ -54,7 +61,12 @@ function buildNode(dir: string, agentId: string): AgentNode {
   let size = 0;
   let firstPrompt = "";
   let finalText = "";
+  let startedTs = 0;
+  let lastTs = 0;
   try {
+    const stat = fs.statSync(file);
+    startedTs = stat.birthtimeMs || stat.mtimeMs;
+    lastTs = stat.mtimeMs;
     const tail = tailReadJsonl(file);
     size = tail.size;
     const thread = parseThread(tail.lines, Number.MAX_SAFE_INTEGER, { includeSidechain: true });
@@ -76,6 +88,9 @@ function buildNode(dir: string, agentId: string): AgentNode {
     toolCount,
     size,
     finalText,
+    startedTs,
+    lastTs,
+    active: lastTs > 0 && now - lastTs < ACTIVE_WINDOW_MS,
   };
 }
 

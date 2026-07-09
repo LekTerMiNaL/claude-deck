@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { api, type AgentNode, type SessionAgents, type ThreadMessage } from "../lib/api";
+import { api, timeAgo, type AgentNode, type SessionAgents, type ThreadMessage } from "../lib/api";
+import { pollMs } from "../lib/config";
 import { Message, formatSize } from "./Message";
 
 interface Props {
@@ -28,10 +29,15 @@ export function AgentTree({ projectPath, sessionId }: Props) {
   useEffect(() => {
     setData(null);
     setOpenId(null);
-    api
-      .agents(projectPath, sessionId)
-      .then(setData)
-      .catch(() => setData({ taskAgents: [], workflows: [] }));
+    const refresh = () =>
+      api
+        .agents(projectPath, sessionId)
+        .then(setData)
+        .catch(() => setData({ taskAgents: [], workflows: [] }));
+    void refresh();
+    // keep polling — a live session can spawn agents while the page is open
+    const t = setInterval(() => void refresh(), pollMs());
+    return () => clearInterval(t);
   }, [projectPath, sessionId]);
 
   if (!data) return null;
@@ -45,10 +51,11 @@ export function AgentTree({ projectPath, sessionId }: Props) {
       <p className="sect mb-3">agents ({total})</p>
 
       <div className="flex flex-col gap-2">
-        {data.taskAgents.map((a) => (
+        {data.taskAgents.map((a, i) => (
           <AgentRow
             key={a.agentId}
             a={a}
+            index={i + 1}
             projectPath={projectPath}
             sessionId={sessionId}
             open={openId === a.agentId}
@@ -62,10 +69,11 @@ export function AgentTree({ projectPath, sessionId }: Props) {
               ▸ workflow <span className="text-muted">{w.wfId}</span> · {w.agents.length} agents
             </p>
             <div className="flex flex-col gap-2 pl-2">
-              {w.agents.map((a) => (
+              {w.agents.map((a, i) => (
                 <AgentRow
                   key={a.agentId}
                   a={a}
+                  index={i + 1}
                   projectPath={projectPath}
                   sessionId={sessionId}
                   open={openId === a.agentId}
@@ -82,12 +90,14 @@ export function AgentTree({ projectPath, sessionId }: Props) {
 
 function AgentRow({
   a,
+  index,
   projectPath,
   sessionId,
   open,
   onToggle,
 }: {
   a: AgentNode;
+  index: number;
   projectPath: string;
   sessionId: string;
   open: boolean;
@@ -115,15 +125,36 @@ function AgentRow({
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
         data-testid="agent-toggle"
       >
+        <span className="w-6 flex-none text-right font-mono text-[10.5px] text-faint">#{index}</span>
         <span
           className={`flex-none rounded-md border px-2 py-[2px] font-mono text-[10.5px] ${chipColor(a.agentType)}`}
         >
           {a.agentType}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-ink">{label}</span>
+          <span className="flex items-center gap-2">
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-ink">{label}</span>
+            {a.active && (
+              <span
+                data-testid="agent-active"
+                className="flex flex-none items-center gap-[5px] font-mono text-[10px] text-busy"
+              >
+                <i className="pulse h-[6px] w-[6px] rounded-full bg-busy shadow-[0_0_8px_var(--color-busy)]" />
+                working
+              </span>
+            )}
+          </span>
+          {a.finalText && !a.active && (
+            <span
+              data-testid="agent-result"
+              className="block overflow-hidden text-ellipsis whitespace-nowrap text-[11.5px] text-muted italic"
+            >
+              ✦ {a.finalText}
+            </span>
+          )}
           <span className="block font-mono text-[11px] text-faint">
             {a.messageCount} messages · {a.toolCount} tools · {formatSize(a.size)}
+            {a.startedTs > 0 && ` · ${timeAgo(a.startedTs)}`}
           </span>
         </span>
         <span className="flex-none font-mono text-[11px] text-cyan">{open ? "▾" : "▸"}</span>

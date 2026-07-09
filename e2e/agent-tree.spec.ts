@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import fs from "node:fs";
 import path from "node:path";
 
 // Self-sufficient: navigate straight to the project view by absolute path so
@@ -50,4 +51,30 @@ test("a session without subagents shows no agent tree", async ({ page }) => {
   await page.goto(projectUrl(moon));
   await expect(page.getByTestId("thread")).toBeVisible();
   await expect(page.getByTestId("agent-tree")).toHaveCount(0);
+});
+
+test("agents spawned AFTER the page is open appear on the next poll", async ({ page }) => {
+  const SID_MOON = "22222222-bbbb-4bbb-8bbb-222222222222";
+  const enc = (p: string) => p.replace(/[^a-zA-Z0-9]/g, "-");
+  const dir = path.resolve("e2e/fixtures/claude-home/projects", enc(moon), SID_MOON, "subagents");
+
+  await page.addInitScript("window.__CLAUDE_DECK_POLL_MS__ = 400;");
+  await page.goto(projectUrl(moon));
+  await expect(page.getByTestId("thread")).toBeVisible();
+  await expect(page.getByTestId("agent-tree")).toHaveCount(0);
+
+  try {
+    // a live session spawns an agent while the page is open
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "agent-abc123.jsonl"),
+      JSON.stringify({ isSidechain: true, type: "user", message: { role: "user", content: "count moon craters" } }) + "\n",
+    );
+    fs.writeFileSync(path.join(dir, "agent-abc123.meta.json"), JSON.stringify({ agentType: "Explore", description: "Count craters" }));
+
+    await expect(page.getByTestId("agent-tree")).toBeVisible({ timeout: 8000 });
+    await expect(page.getByTestId("agent-tree")).toContainText("Count craters");
+  } finally {
+    fs.rmSync(path.dirname(dir), { recursive: true, force: true }); // restore: moon has no agents
+  }
 });

@@ -63,6 +63,10 @@ describe("listSessionAgents", () => {
     expect(builder).toMatchObject({ description: "Build login", messageCount: 2, toolCount: 1 });
     expect(builder.firstPrompt).toBe("Build the login feature");
     expect(builder.finalText).toBe("done, wired jose auth");
+    // freshly-written fixture files → active (mtime just now), timestamps set
+    expect(builder.active).toBe(true);
+    expect(builder.startedTs).toBeGreaterThan(0);
+    expect(builder.lastTs).toBeGreaterThanOrEqual(builder.startedTs);
 
     expect(workflows).toHaveLength(1);
     expect(workflows[0]?.wfId).toBe("wf_abc123");
