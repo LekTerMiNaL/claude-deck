@@ -38,7 +38,11 @@ clean and never commit anything containing the owner's transcript data.
       (validated chart palette #8b5cf6/#0891b2/#16a34a/#d97706 on #12152a), remove
       project/root from deck UI (specs: `docs/spec/phase-5-*.md`, `phase-6-*.md`,
       merged 2026-07-10)
-- Full gate as of Phase 6: 69 Vitest unit + 41 Playwright e2e, all on synthesized fixtures
+- [x] Phase 7: full-text transcript search ("✦ full text" mode on `/search`) — extracted-
+      text cache in `~/.claude-deck/text-index/` (append-aware incremental, measured:
+      135MB transcript → 2.3MB text in 1.4s), substring scan (Thai-friendly), no inverted
+      index needed (spec: `docs/spec/phase-7-deep-search.md`, merged 2026-07-14)
+- Full gate as of Phase 7: 76 Vitest unit + 46 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck
