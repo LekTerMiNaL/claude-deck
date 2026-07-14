@@ -18,7 +18,13 @@ export function App() {
     return <Timeline navigate={navigate} />;
   }
   if (route.pathname === "/search") {
-    return <Search navigate={navigate} initialQuery={route.query.get("q") ?? ""} />;
+    return (
+      <Search
+        navigate={navigate}
+        initialQuery={route.query.get("q") ?? ""}
+        initialMode={route.query.get("mode") === "deep" ? "deep" : "prompts"}
+      />
+    );
   }
   if (route.pathname === "/stats") {
     return <Stats navigate={navigate} />;

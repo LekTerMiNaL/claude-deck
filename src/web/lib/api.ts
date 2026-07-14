@@ -121,6 +121,10 @@ export const api = {
     get<{ entries: TimelineEntry[]; total: number }>(
       `/api/search?q=${encodeURIComponent(q)}&limit=${limit}`,
     ),
+  deepSearch: (q: string, limit = 50) =>
+    get<{ matches: DeepMatch[]; total: number; indexMs: number }>(
+      `/api/search/deep?q=${encodeURIComponent(q)}&limit=${limit}`,
+    ),
   summarize: (path: string, id: string) =>
     send<{ summary: string; cached: boolean }>("POST", "/api/session/summary", { path, id }),
   openTerminal: (path: string, id: string) =>
@@ -170,6 +174,16 @@ export interface UsageInfo {
   model: string | null;
   windows: UsageWindow[];
   stale: boolean;
+}
+
+export interface DeepMatch {
+  project: string | null;
+  projectName: string;
+  displayPath: string | null;
+  sessionId: string;
+  role: "user" | "assistant";
+  ts: string | null;
+  snippet: string;
 }
 
 export interface StatsPayload {

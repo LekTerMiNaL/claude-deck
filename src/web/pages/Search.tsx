@@ -1,46 +1,88 @@
 import { useEffect, useRef, useState } from "react";
-import { api, type TimelineEntry } from "../lib/api";
+import { api, type DeepMatch, type TimelineEntry } from "../lib/api";
 import { projectUrl } from "../lib/router";
 
 const DEBOUNCE_MS = 250;
 const LIMIT = 50;
 
-export function Search({ navigate, initialQuery }: { navigate: (to: string) => void; initialQuery: string }) {
+export type SearchMode = "prompts" | "deep";
+
+export function Search({
+  navigate,
+  initialQuery,
+  initialMode,
+}: {
+  navigate: (to: string) => void;
+  initialQuery: string;
+  initialMode: SearchMode;
+}) {
   const [q, setQ] = useState(initialQuery);
+  const [mode, setMode] = useState<SearchMode>(initialMode);
   const [entries, setEntries] = useState<TimelineEntry[]>([]);
+  const [matches, setMatches] = useState<DeepMatch[]>([]);
   const [total, setTotal] = useState(0);
   const [searched, setSearched] = useState(false);
+  const [indexing, setIndexing] = useState(false);
   const seq = useRef(0);
 
   useEffect(() => {
     const query = q.trim();
-    // keep the query in the URL so back/reload restore the search
-    window.history.replaceState(null, "", query ? `/search?q=${encodeURIComponent(query)}` : "/search");
+    // keep query + mode in the URL so back/reload restore the search
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (mode === "deep") params.set("mode", "deep");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `/search?${qs}` : "/search");
     if (!query) {
       setEntries([]);
+      setMatches([]);
       setTotal(0);
       setSearched(false);
       return;
     }
     const mySeq = ++seq.current;
     const t = setTimeout(() => {
-      api
-        .search(query, LIMIT)
-        .then((res) => {
-          if (seq.current !== mySeq) return; // stale response — a newer query won
-          setEntries(res.entries);
-          setTotal(res.total);
+      if (mode === "deep") setIndexing(true); // first run may build the index
+      const done = () => {
+        if (seq.current === mySeq) {
           setSearched(true);
-        })
-        .catch(() => {
-          if (seq.current !== mySeq) return;
-          setEntries([]);
-          setTotal(0);
-          setSearched(true);
-        });
+          setIndexing(false);
+        }
+      };
+      if (mode === "prompts") {
+        api
+          .search(query, LIMIT)
+          .then((res) => {
+            if (seq.current !== mySeq) return;
+            setEntries(res.entries);
+            setMatches([]);
+            setTotal(res.total);
+          })
+          .catch(() => {
+            if (seq.current !== mySeq) return;
+            setEntries([]);
+            setTotal(0);
+          })
+          .finally(done);
+      } else {
+        api
+          .deepSearch(query, LIMIT)
+          .then((res) => {
+            if (seq.current !== mySeq) return;
+            setMatches(res.matches);
+            setEntries([]);
+            setTotal(res.total);
+          })
+          .catch(() => {
+            if (seq.current !== mySeq) return;
+            setMatches([]);
+            setTotal(0);
+          })
+          .finally(done);
+      }
     }, DEBOUNCE_MS);
     return () => clearTimeout(t);
-  }, [q]);
+  }, [q, mode]);
 
   return (
     <>
@@ -68,11 +110,35 @@ export function Search({ navigate, initialQuery }: { navigate: (to: string) => v
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="grep your prompt history…"
+            placeholder={mode === "prompts" ? "grep your prompt history…" : "grep every transcript — what claude said too…"}
             className="w-full bg-transparent outline-none placeholder:text-faint"
             data-testid="search-input"
           />
         </label>
+
+        <div className="mt-3 flex items-center gap-2 font-mono text-[11px]">
+          <button
+            data-testid="mode-prompts"
+            onClick={() => setMode("prompts")}
+            className={`cursor-pointer rounded-md border px-[10px] py-[3px] ${
+              mode === "prompts" ? "border-vio/40 text-vio" : "border-line text-faint hover:text-muted"
+            }`}
+          >
+            ❯ prompts
+          </button>
+          <button
+            data-testid="mode-deep"
+            onClick={() => setMode("deep")}
+            className={`cursor-pointer rounded-md border px-[10px] py-[3px] ${
+              mode === "deep" ? "border-cyan/40 text-cyan" : "border-line text-faint hover:text-muted"
+            }`}
+          >
+            ✦ full text
+          </button>
+          <span className="text-faint">
+            {mode === "prompts" ? "· what you typed" : "· everything in every transcript"}
+          </span>
+        </div>
 
         <div className="mt-4">
           {!q.trim() && (
@@ -80,10 +146,60 @@ export function Search({ navigate, initialQuery }: { navigate: (to: string) => v
               # type to search — e.g. a bug you remember fixing, a feature name, ราคาทอง…
             </p>
           )}
-          {searched && q.trim() && entries.length === 0 && (
-            <p className="font-mono text-xs text-faint" data-testid="search-empty">
-              no prompts matching "{q.trim()}"
+          {indexing && !searched && (
+            <p className="font-mono text-xs text-faint" data-testid="search-indexing">
+              ⠸ indexing transcripts…
             </p>
+          )}
+          {searched && q.trim() && entries.length === 0 && matches.length === 0 && (
+            <p className="font-mono text-xs text-faint" data-testid="search-empty">
+              no {mode === "prompts" ? "prompts" : "transcript text"} matching "{q.trim()}"
+            </p>
+          )}
+          {matches.length > 0 && (
+            <>
+              <p className="mb-2 font-mono text-[11.5px] text-faint" data-testid="search-count">
+                <b className="font-medium text-cyan">{total}</b> match{total === 1 ? "" : "es"}
+                {total > matches.length ? ` · showing newest ${matches.length}` : ""}
+              </p>
+              <div className="flex flex-col gap-[6px]">
+                {matches.map((m, i) => (
+                  <div
+                    key={`${m.sessionId}-${i}`}
+                    data-testid="deep-row"
+                    className="flex items-start gap-3 rounded-xl border border-line bg-glass px-4 py-[9px] backdrop-blur-[8px]"
+                  >
+                    <span
+                      className={`flex-none font-mono text-[12px] ${m.role === "user" ? "text-vio" : "text-cyan"}`}
+                      title={m.role === "user" ? "you said" : "claude said"}
+                      data-testid="deep-role"
+                    >
+                      {m.role === "user" ? "❯" : "✦"}
+                    </span>
+                    {m.project && (
+                      <button
+                        onClick={() => navigate(projectUrl(m.project!))}
+                        className="flex-none cursor-pointer rounded-md border border-vio/35 px-2 py-[1px] font-mono text-[10.5px] text-vio hover:bg-vio/10"
+                        title={m.displayPath ?? undefined}
+                      >
+                        {m.projectName}
+                      </button>
+                    )}
+                    <span className="min-w-0 flex-1 text-[12.5px] text-muted">
+                      <Highlight text={m.snippet} query={q.trim()} />
+                    </span>
+                    {m.project && (
+                      <button
+                        onClick={() => navigate(projectUrl(m.project!, m.sessionId))}
+                        className="flex-none cursor-pointer font-mono text-[10.5px] text-cyan opacity-70 hover:opacity-100"
+                      >
+                        open ↗
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
           {entries.length > 0 && (
             <>

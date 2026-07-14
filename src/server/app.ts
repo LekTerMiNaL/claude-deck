@@ -20,6 +20,7 @@ import { timeline, historyEntries } from "./data/timeline.js";
 import { listSessionAgents, readSubagentThread, AGENT_ID_RE } from "./data/subagents.js";
 import { readUsage } from "./data/usage.js";
 import { buildStats } from "./data/stats.js";
+import { refreshTextIndex, deepSearch } from "./data/text-index.js";
 
 export function createApp(): Hono {
   const app = new Hono();
@@ -178,6 +179,15 @@ export function createApp(): Hono {
   app.get("/api/timeline", (c) => {
     const limit = Math.min(500, Math.max(1, Number(c.req.query("limit")) || 100));
     return c.json({ entries: timeline(limit) });
+  });
+
+  app.get("/api/search/deep", (c) => {
+    const q = c.req.query("q")?.trim();
+    if (!q) return c.json({ error: "q is required" }, 400);
+    const limit = Math.min(200, Math.max(1, Number(c.req.query("limit")) || 50));
+    const stats = refreshTextIndex(); // incremental — cheap when nothing changed
+    const { matches, total } = deepSearch(q, limit);
+    return c.json({ matches, total, indexMs: stats.ms, indexedNew: stats.newMessages });
   });
 
   app.get("/api/search", (c) => {
