@@ -230,7 +230,7 @@ export function SessionView({ projectPath, initialSessionId, navigate }: Props) 
                 {summarizing ? "✦ summarizing…" : summary ? "✦ re-summarize" : "✦ summarize"}
               </button>
               {summaryError && (
-                <p className="py-[7px] font-mono text-[11.5px] text-[#fbbf24]" data-testid="summary-error">
+                <p className="py-[7px] font-mono text-[11.5px] text-warn" data-testid="summary-error">
                   ⚠ {summaryError}
                 </p>
               )}

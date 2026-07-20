@@ -74,7 +74,7 @@ export function AddModal({ onClose, onChanged }: Props) {
       <div className="fixed inset-0 bg-[rgba(4,6,14,.72)] backdrop-blur-[4px]" onClick={onClose} />
       <div
         data-testid="add-modal"
-        className="fixed top-1/2 left-1/2 max-h-[86vh] w-[640px] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border border-line bg-[#0d1122] shadow-[0_40px_100px_rgba(0,0,0,.6)] flex flex-col"
+        className="fixed top-1/2 left-1/2 max-h-[86vh] w-[640px] max-w-[92vw] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] border border-line bg-panel shadow-[0_40px_100px_rgba(0,0,0,.6)] flex flex-col"
       >
         <div className="flex items-center gap-[6px] border-b border-line bg-white/[0.02] px-5 py-[14px]">
           <span className="h-[10px] w-[10px] rounded-full bg-[#ff6666]" />
@@ -125,7 +125,7 @@ export function AddModal({ onClose, onChanged }: Props) {
             </button>
           </div>
           {error && (
-            <p data-testid="modal-error" className="mt-2 font-mono text-[11.5px] text-[#fbbf24]">
+            <p data-testid="modal-error" className="mt-2 font-mono text-[11.5px] text-warn">
               ⚠ {error}
             </p>
           )}
@@ -193,7 +193,7 @@ function RootChipRemove({ root, onRemove }: { root: RootInfo; onRemove: () => vo
         data-testid="remove-root"
         onClick={() => (armed ? onRemove() : setArmed(true))}
         title="unregister this root (its already-added projects stay in the deck)"
-        className={`cursor-pointer ${armed ? "text-[#fbbf24]" : "text-faint hover:text-muted"}`}
+        className={`cursor-pointer ${armed ? "text-warn" : "text-faint hover:text-muted"}`}
       >
         {armed ? "sure?" : "✕"}
       </button>
@@ -213,7 +213,7 @@ function ScanRow({ item, onAdd }: { item: ScanItem; onAdd: (path: string) => voi
       <span className="min-w-0 flex-1">
         <b className="block font-mono text-[13.5px] font-medium">{item.name}</b>
         {item.missing ? (
-          <span className="block font-mono text-[11.5px] text-[#fbbf24]">⚠ folder missing — history only</span>
+          <span className="block font-mono text-[11.5px] text-warn">⚠ folder missing — history only</span>
         ) : (
           <span className="block overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11.5px] text-faint">
             {item.displayPath}

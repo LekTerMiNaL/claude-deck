@@ -139,7 +139,7 @@ export function ColumnChart({ data, series, xEvery = 7, formatX = (x) => x, heig
       {active !== null && data[active] && (
         <div
           data-testid="chart-tooltip"
-          className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 rounded-lg border border-line bg-[#0d1122] px-3 py-2 font-mono text-[10.5px] whitespace-nowrap shadow-[0_8px_30px_rgba(0,0,0,.5)]"
+          className="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 rounded-lg border border-line bg-panel px-3 py-2 font-mono text-[10.5px] whitespace-nowrap shadow-[0_8px_30px_rgba(0,0,0,.5)]"
           style={{ left: `${((PAD_L + active * (innerW / Math.max(1, data.length)) + innerW / Math.max(1, data.length) / 2) / W) * 100}%` }}
         >
           <p className="text-muted">{formatX(data[active]!.x)}</p>

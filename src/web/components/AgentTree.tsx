@@ -13,7 +13,7 @@ const CHIP_COLORS = [
   "border-vio/40 text-vio",
   "border-cyan/40 text-cyan",
   "border-busy/40 text-busy",
-  "border-[#fbbf24]/40 text-[#fbbf24]",
+  "border-warn/40 text-warn",
   "border-[#f472b6]/40 text-[#f472b6]",
 ];
 function chipColor(type: string): string {
