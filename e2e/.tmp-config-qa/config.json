@@ -1,0 +1,10 @@
+{
+  "projects": [
+    "/Users/nboonma/Documents/AiProject/claude-deck/e2e/fixtures/workspace/rocket-shop",
+    "/Users/nboonma/Documents/AiProject/claude-deck/e2e/fixtures/workspace/moon-blog",
+    "/Users/nboonma/Documents/AiProject/claude-deck/e2e/fixtures/workspace/empty-lab"
+  ],
+  "roots": [
+    "/Users/nboonma/Documents/AiProject/claude-deck/e2e/fixtures/workspace"
+  ]
+}

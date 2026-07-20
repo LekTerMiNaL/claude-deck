@@ -7,6 +7,12 @@
 @import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/700.css";
+/* theme fonts (bundled — no external calls) */
+@import "@fontsource/press-start-2p/400.css";
+@import "@fontsource/vt323/400.css";
+@import "@fontsource/bricolage-grotesque/500.css";
+@import "@fontsource/bricolage-grotesque/700.css";
+@import "@fontsource/bricolage-grotesque/800.css";
 
 @theme {
   --color-bg: #0a0d1c;
@@ -15,9 +21,12 @@
   --color-faint: #5b6382;
   --color-line: rgba(255, 255, 255, 0.09);
   --color-glass: rgba(255, 255, 255, 0.045);
+  --color-panel: #0d1122;
   --color-vio: #a78bfa;
   --color-cyan: #67e8f9;
   --color-busy: #4ade80;
+  --color-warn: #fbbf24;
+  --color-danger: #f87171;
   --font-disp: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -28,6 +37,98 @@
   --color-series-3: #16a34a;
   --color-series-4: #d97706;
 }
+
+/* ── theme: arcade (soft synthwave — mock docs/mockups/theme-arcade.html) ── */
+[data-theme="arcade"] {
+  --color-bg: #140a30;
+  --color-ink: #f3eeff;
+  --color-muted: #b9a8e6;
+  --color-faint: #8a76bd;
+  --color-line: rgba(255, 110, 199, 0.28);
+  --color-glass: rgba(30, 16, 58, 0.72);
+  --color-panel: #1e103a;
+  --color-vio: #ff6ec7;
+  --color-cyan: #5ce8f5;
+  --color-busy: #9dff70;
+  --color-warn: #ffd66e;
+  --color-danger: #ff7d9c;
+  --font-disp: "Press Start 2P", monospace;
+  --font-body: "VT323", monospace;
+  --font-mono: "VT323", monospace;
+  /* same validated series set — re-checked on #241645: ALL PASS (≥3.89:1) */
+  font-size: 17px;
+}
+[data-theme="arcade"] body {
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 32% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 58% 22%, #ffd66e, transparent),
+    radial-gradient(1px 1px at 76% 12%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90% 30%, #5ce8f5, transparent),
+    linear-gradient(180deg, #140a30, #241145 70%, #341b5e);
+  background-attachment: fixed;
+}
+[data-theme="arcade"] body::after {
+  content: "";
+  position: fixed;
+  left: -10%;
+  right: -10%;
+  bottom: -40px;
+  height: 240px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.3;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 110, 199, 0.5) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(92, 232, 245, 0.4) 0 1px, transparent 1px 60px);
+  transform: perspective(300px) rotateX(58deg);
+  mask-image: linear-gradient(180deg, transparent, black 45%);
+}
+[data-theme="arcade"] .bg-glass {
+  box-shadow: 0 0 22px rgba(92, 232, 245, 0.1);
+  backdrop-filter: blur(8px);
+}
+[data-theme="arcade"] .glow-1 { background: rgba(255, 110, 199, 0.16); }
+[data-theme="arcade"] .glow-2 { background: rgba(92, 232, 245, 0.12); }
+
+/* ── theme: dopamine (neo-brutalist candy — mock docs/mockups/theme-dopamine.html) ── */
+[data-theme="dopamine"] {
+  --color-bg: #fdf4e7;
+  --color-ink: #1a1023;
+  --color-muted: #6b5a7e;
+  --color-faint: #9a8aad;
+  --color-line: rgba(26, 16, 35, 0.85);
+  --color-glass: #fffdf8;
+  --color-panel: #fffdf8;
+  --color-vio: #ff3d8a;
+  --color-cyan: #0284c7;
+  --color-busy: #4d9e0e;
+  --color-warn: #b45309;
+  --color-danger: #dc2626;
+  --font-disp: "Bricolage Grotesque", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  /* candy series validated on #fffdf8 (light band): ALL PASS, worst ΔE 19.2 */
+  --color-series-1: #7c3aed;
+  --color-series-2: #ea580c;
+  --color-series-3: #0369a1;
+  --color-series-4: #db2777;
+}
+[data-theme="dopamine"] body {
+  background:
+    radial-gradient(420px 420px at -2% -6%, rgba(255, 199, 221, 0.55), transparent 70%),
+    radial-gradient(480px 480px at 104% 26%, rgba(217, 201, 255, 0.55), transparent 70%),
+    radial-gradient(420px 420px at 40% 110%, rgba(255, 233, 179, 0.6), transparent 70%),
+    #fdf4e7;
+  background-attachment: fixed;
+}
+[data-theme="dopamine"] .bg-glass {
+  border-width: 2px;
+  box-shadow: 4px 4px 0 rgba(26, 16, 35, 0.9);
+  backdrop-filter: none;
+}
+[data-theme="dopamine"] .glow { display: none; }
+[data-theme="dopamine"] .cursor-blink { box-shadow: none; }
 
 body {
   background: var(--color-bg);

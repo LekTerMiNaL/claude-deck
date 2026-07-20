@@ -3,6 +3,7 @@ import { api, timeAgo, uptime, type DeckCard, type LiveCard, type UsageInfo } fr
 import { projectUrl } from "../lib/router";
 import { pollMs } from "../lib/config";
 import { useIdleNotifications } from "../hooks/useIdleNotifications";
+import { applyTheme, nextTheme, savedTheme, THEME_META, type Theme } from "../lib/theme";
 import { AddModal } from "../components/AddModal";
 
 export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
@@ -11,8 +12,15 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>(savedTheme);
   const notify = useIdleNotifications();
   const { onPoll } = notify; // stable useCallback — keep refresh identity steady
+
+  const cycleTheme = () => {
+    const t = nextTheme(theme);
+    applyTheme(t);
+    setTheme(t);
+  };
 
   const refresh = useCallback(async () => {
     try {
@@ -46,6 +54,14 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
             <span className="grad">claude-deck</span>
           </span>
           <div className="flex items-center gap-[14px]">
+            <button
+              data-testid="theme-toggle"
+              onClick={cycleTheme}
+              title={`theme: ${THEME_META[theme].label} — click to switch`}
+              className="cursor-pointer font-mono text-xs text-faint hover:text-cyan"
+            >
+              {THEME_META[theme].icon} {THEME_META[theme].label}
+            </button>
             {usage?.configured && <UsagePill usage={usage} />}
             <button
               data-testid="notif-toggle"
@@ -61,7 +77,7 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
                 notify.state === "on"
                   ? "text-cyan"
                   : notify.state === "blocked"
-                    ? "text-[#fbbf24]"
+                    ? "text-warn"
                     : "text-faint hover:text-cyan"
               }`}
             >
@@ -159,8 +175,8 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
 }
 
 function UsagePill({ usage }: { usage: UsageInfo }) {
-  const tone = (p: number) => (p >= 90 ? "text-[#f87171]" : p >= 70 ? "text-[#fbbf24]" : "text-cyan");
-  const fill = (p: number) => (p >= 90 ? "bg-[#f87171]" : p >= 70 ? "bg-[#fbbf24]" : "bg-cyan");
+  const tone = (p: number) => (p >= 90 ? "text-danger" : p >= 70 ? "text-warn" : "text-cyan");
+  const fill = (p: number) => (p >= 90 ? "bg-danger" : p >= 70 ? "bg-warn" : "bg-cyan");
   const title = [
     ...usage.windows.map(
       (w) => `${w.label} ${Math.round(w.usedPercentage)}%${w.resetsAt ? ` · resets ${new Date(w.resetsAt).toLocaleString()}` : ""}`,
@@ -263,7 +279,7 @@ function ProjectCard({
             onClick={(e) => void removeClick(e)}
             title="remove from deck (files stay untouched)"
             className={`cursor-pointer font-mono text-[10.5px] ${
-              armed ? "text-[#fbbf24]" : "text-faint/60 hover:text-muted"
+              armed ? "text-warn" : "text-faint/60 hover:text-muted"
             }`}
           >
             {armed ? "sure?" : "✕"}
@@ -274,7 +290,7 @@ function ProjectCard({
         <h3 className="font-disp text-lg font-bold">{p.name}</h3>
         <p className="mt-[2px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-faint">
           {p.displayPath}
-          {p.missing && <span className="text-[#fbbf24]"> · ⚠ folder missing</span>}
+          {p.missing && <span className="text-warn"> · ⚠ folder missing</span>}
         </p>
         <div className="mt-3 flex gap-[14px] font-mono text-[11.5px] text-muted">
           <span>

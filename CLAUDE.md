@@ -42,7 +42,12 @@ clean and never commit anything containing the owner's transcript data.
       text cache in `~/.claude-deck/text-index/` (append-aware incremental, measured:
       135MB transcript → 2.3MB text in 1.4s), substring scan (Thai-friendly), no inverted
       index needed (spec: `docs/spec/phase-7-deep-search.md`, merged 2026-07-14)
-- Full gate as of Phase 7: 76 Vitest unit + 46 Playwright e2e, all on synthesized fixtures
+- [x] Phase 8: themes — midnight (default) · arcade (soft synthwave) · dopamine
+      (neo-brutalist candy); `[data-theme]` token overrides + `.bg-glass` restyles,
+      fonts bundled via @fontsource, header cycle button, localStorage; chart palettes
+      validated per surface (approved mocks: `docs/mockups/theme-*.html`;
+      spec: `docs/spec/phase-8-themes.md`, merged 2026-07-21)
+- Full gate as of Phase 8: 79 Vitest unit + 49 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck

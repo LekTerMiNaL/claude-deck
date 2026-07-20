@@ -28,8 +28,8 @@ test("usage pill shows 5h + week windows with the right tones", async ({ page })
   await expect(pill).toBeVisible();
   await expect(page.getByTestId("usage-5h")).toContainText("34%");
   await expect(page.getByTestId("usage-week")).toContainText("81%");
-  // 81% → amber, 34% → cyan
-  await expect(page.getByTestId("usage-week")).toHaveClass(/fbbf24/);
+  // 81% → amber (warn token), 34% → cyan
+  await expect(page.getByTestId("usage-week")).toHaveClass(/text-warn/);
   await expect(page.getByTestId("usage-5h")).toHaveClass(/text-cyan/);
   await expect(pill).not.toContainText("stale");
 });

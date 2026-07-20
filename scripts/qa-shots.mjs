@@ -90,6 +90,19 @@ await mobile.goto(BASE);
 await mobile.waitForSelector('[data-testid="deck-card"]');
 await mobile.screenshot({ path: `${OUT}/5-dashboard-mobile.png`, fullPage: true });
 
+// 16-18. the three themes on the populated dashboard (+ one non-default inner page)
+for (const [i, theme] of [["16", "arcade"], ["17", "dopamine"]]) {
+  await desktop.evaluate((t) => localStorage.setItem("claudeDeck.theme", t), theme);
+  await desktop.goto(BASE);
+  await desktop.waitForSelector('[data-testid="deck-card"]');
+  await desktop.waitForTimeout(400);
+  await desktop.screenshot({ path: `${OUT}/${i}-theme-${theme}.png`, fullPage: true });
+}
+await desktop.goto(`${BASE}/stats`); // dopamine stats — light-surface charts
+await desktop.waitForSelector('[data-testid="chart-card"]');
+await desktop.screenshot({ path: `${OUT}/18-theme-dopamine-stats.png`, fullPage: true });
+await desktop.evaluate(() => localStorage.setItem("claudeDeck.theme", "midnight"));
+
 // 6. session view (desktop + mobile) — rocket-shop has the realistic thread
 await desktop.locator('[data-testid="deck-card"]', { hasText: "rocket-shop" }).click();
 await desktop.waitForSelector('[data-testid="thread"]');

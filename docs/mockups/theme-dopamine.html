@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>claude-deck — Dopamine theme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf4e7;--ink:#1a1023;--muted:#6b5a7e;--card:#fffdf8;--bd:#1a1023;
+--pink:#ff3d8a;--orange:#ff8a00;--purple:#8b5cf6;--sky:#26c4ff;--lime:#8ed80e;--lemon:#ffd60a;}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Inter",sans-serif;font-size:14.5px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.5;pointer-events:none;z-index:0}
+.b1{top:-120px;left:-60px;width:420px;height:420px;background:#ffc7dd}
+.b2{top:220px;right:-140px;width:480px;height:480px;background:#d9c9ff}
+.b3{bottom:-160px;left:30%;width:420px;height:420px;background:#ffe9b3}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
+.disp{font-family:"Bricolage Grotesque",sans-serif}
+.mono{font-family:"JetBrains Mono",monospace}
+header{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+.logo{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:22px;letter-spacing:-.5px}
+.logo .tilde{color:var(--pink)}
+.logo .deck{background:linear-gradient(90deg,var(--pink),var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hright{display:flex;gap:12px;align-items:center}
+.chip{display:flex;align-items:center;gap:8px;background:var(--card);border:2.5px solid var(--bd);border-radius:999px;padding:8px 14px;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;box-shadow:3px 3px 0 var(--bd)}
+.chip .meter{width:44px;height:8px;border:1.5px solid var(--bd);border-radius:99px;overflow:hidden;background:#fff}
+.chip .meter i{display:block;height:100%}
+.chip.live{background:#e6ffce}
+.chip.live i.dot{width:10px;height:10px;border-radius:50%;background:var(--lime);border:1.5px solid var(--bd);animation:pop 1.3s infinite}
+@keyframes pop{50%{transform:scale(.65)}}
+.addbtn{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:14px;background:var(--pink);color:#fff;border:2.5px solid var(--bd);border-radius:999px;padding:10px 18px;box-shadow:4px 4px 0 var(--bd);cursor:pointer;transition:transform .1s}
+.addbtn:hover{transform:translate(-1px,-1px)}
+.sect{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:18px;margin:34px 0 14px;display:flex;align-items:center;gap:8px}
+.sect .tag{font-size:11px;font-family:"JetBrains Mono",monospace;font-weight:700;background:var(--lemon);border:2px solid var(--bd);border-radius:99px;padding:2px 10px;box-shadow:2px 2px 0 var(--bd)}
+.livegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.lcard{background:var(--card);border:2.5px solid var(--bd);border-radius:20px;padding:16px 18px;position:relative;box-shadow:5px 5px 0 var(--bd)}
+.st{display:inline-flex;align-items:center;gap:7px;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;border:2px solid var(--bd);border-radius:99px;padding:3px 10px}
+.st.busy{background:var(--lime);color:#173300}
+.st.busy i{width:8px;height:8px;border-radius:50%;background:#173300;animation:pop 1.2s infinite}
+.st.idle{background:#efe9f7;color:var(--muted)}
+.go{position:absolute;top:14px;right:14px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:12px;background:var(--sky);color:#00263a;border:2px solid var(--bd);border-radius:10px;padding:5px 10px;box-shadow:2.5px 2.5px 0 var(--bd)}
+.lcard h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:18px;margin-top:10px}
+.lcard p{color:var(--muted);font-size:12.5px}
+.lcard .last{margin-top:8px;font-size:12.5px;color:var(--ink);background:#fff1f7;border:1.5px dashed var(--pink);border-radius:10px;padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--card);border:2.5px solid var(--bd);border-radius:22px;overflow:hidden;box-shadow:6px 6px 0 var(--bd);transition:transform .12s}
+.card:hover{transform:translate(-2px,-2px) rotate(-.3deg)}
+.card .bar{display:flex;align-items:center;gap:7px;padding:10px 16px;border-bottom:2.5px solid var(--bd)}
+.c1{background:var(--pink)}.c2{background:var(--purple)}.c3{background:var(--sky)}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--bd)}
+.d1{background:var(--lemon)}.d2{background:var(--lime)}.d3{background:#fff}
+.card .bar .t{margin-left:6px;font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700;color:#fff}
+.card .bar .lv{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;background:#fff;border:2px solid var(--bd);border-radius:99px;padding:1px 8px}
+.cb{padding:16px 18px}
+.card h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:20px}
+.card .path{font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.stat{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;border:2px solid var(--bd);border-radius:99px;padding:3px 10px;box-shadow:2px 2px 0 var(--bd)}
+.s1{background:#ffe1ee}.s2{background:#e8f7ff}.s3{background:#f0e9ff}
+.lastp{margin-top:12px;font-size:12.5px;background:#fff8dc;border:1.5px dashed var(--orange);border-radius:12px;padding:6px 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lastp::before{content:"💬 "}
+.addcard{border:3px dashed var(--bd);border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:190px;cursor:pointer;background:rgba(255,255,255,.5)}
+.addcard .plus{width:52px;height:52px;border-radius:18px;background:var(--lemon);border:2.5px solid var(--bd);display:grid;place-items:center;font-size:26px;font-weight:800;box-shadow:3px 3px 0 var(--bd)}
+.addcard p{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;color:var(--muted)}
+footer{margin-top:44px;border-top:2.5px solid var(--bd);padding:18px 0 28px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<div class="wrap">
+  <header>
+    <span class="logo"><span class="tilde">~/</span><span class="deck">claude-deck</span> <span style="font-size:16px">✨</span></span>
+    <div class="hright">
+      <span class="chip">5h <span class="meter"><i style="width:54%;background:var(--orange)"></i></span> 54% · wk <span class="meter"><i style="width:5%;background:var(--lime)"></i></span> 5%</span>
+      <span class="chip live"><i class="dot"></i>1 running</span>
+      <a class="addbtn" href="#">+ Add project</a>
+    </div>
+  </header>
+
+  <p class="sect">Live now <span class="tag">2 sessions</span></p>
+  <div class="livegrid">
+    <div class="lcard">
+      <span class="st busy"><i></i>busy</span>
+      <a class="go" href="#">open ↗</a>
+      <h3>rocket-shop-7 🚀</h3>
+      <p>rocket-shop · pid 111111 · 2h 14m</p>
+      <p class="last">❯ fix rocket engine overheating bug</p>
+    </div>
+    <div class="lcard">
+      <span class="st idle">idle</span>
+      <a class="go" href="#">open ↗</a>
+      <h3>moon-blog-2 🌙</h3>
+      <p>moon-blog · pid 222222 · 1h 00m</p>
+      <p class="last">❯ write a post about moon dust</p>
+    </div>
+  </div>
+
+  <p class="sect">Deck <span class="tag">3 projects</span></p>
+  <div class="grid">
+    <div class="card">
+      <div class="bar c1"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="t">rocket-shop</span><span class="lv">● 1 live</span></div>
+      <div class="cb">
+        <h3>rocket-shop</h3>
+        <p class="path">~/workspace/rocket-shop</p>
+        <div class="stats"><span class="stat s1">12 sessions</span><span class="stat s2">last 2m</span><span class="stat s3">1,204 prompts</span></div>
+        <p class="lastp">fix rocket engine overheating bug</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bar c2"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="t">moon-blog</span></div>
+      <div class="cb">
+        <h3>moon-blog</h3>
+        <p class="path">~/workspace/moon-blog</p>
+        <div class="stats"><span class="stat s1">3 sessions</span><span class="stat s2">last 2d</span><span class="stat s3">214 prompts</span></div>
+        <p class="lastp">write a post about moon dust</p>
+      </div>
+    </div>
+    <div class="addcard">
+      <span class="plus">+</span>
+      <p>add project to deck</p>
+    </div>
+  </div>
+
+  <footer>claude-deck · local only (127.0.0.1) · reads ~/.claude read-only · © 2026 LekTerMiNaL · MIT 🍭</footer>
+</div>
+</body>
+</html>
