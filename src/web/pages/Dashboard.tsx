@@ -3,8 +3,9 @@ import { api, timeAgo, uptime, type DeckCard, type LiveCard, type UsageInfo } fr
 import { projectUrl } from "../lib/router";
 import { pollMs } from "../lib/config";
 import { useIdleNotifications } from "../hooks/useIdleNotifications";
-import { applyTheme, nextTheme, savedTheme, THEME_META, type Theme } from "../lib/theme";
+import { savedTheme, THEME_META, type Theme } from "../lib/theme";
 import { AddModal } from "../components/AddModal";
+import { ThemeModal } from "../components/ThemeModal";
 
 export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
   const [live, setLive] = useState<LiveCard[]>([]);
@@ -12,15 +13,11 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
   const [usage, setUsage] = useState<UsageInfo | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [usageOpen, setUsageOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(savedTheme);
   const notify = useIdleNotifications();
   const { onPoll } = notify; // stable useCallback — keep refresh identity steady
-
-  const cycleTheme = () => {
-    const t = nextTheme(theme);
-    applyTheme(t);
-    setTheme(t);
-  };
 
   const refresh = useCallback(async () => {
     try {
@@ -56,13 +53,15 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
           <div className="flex items-center gap-[14px]">
             <button
               data-testid="theme-toggle"
-              onClick={cycleTheme}
-              title={`theme: ${THEME_META[theme].label} — click to switch`}
+              onClick={() => setThemeOpen(true)}
+              title="choose theme"
               className="cursor-pointer font-mono text-xs text-faint hover:text-cyan"
             >
               {THEME_META[theme].icon} {THEME_META[theme].label}
             </button>
-            {usage?.configured && <UsagePill usage={usage} />}
+            {usage?.configured && (
+              <UsagePill usage={usage} open={usageOpen} onToggle={() => setUsageOpen((o) => !o)} />
+            )}
             <button
               data-testid="notif-toggle"
               onClick={() => void notify.toggle()}
@@ -120,6 +119,8 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
           </div>
         </header>
 
+        {usage?.configured && usageOpen && <UsagePanel usage={usage} onClose={() => setUsageOpen(false)} />}
+
         <p className="sect mt-[34px] mb-[14px]">Live now</p>
         {live.length === 0 ? (
           <p data-testid="live-empty" className="font-mono text-xs text-faint">
@@ -170,41 +171,82 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
       </div>
 
       {modalOpen && <AddModal onClose={() => setModalOpen(false)} onChanged={() => void refresh()} />}
+      {themeOpen && <ThemeModal current={theme} onPick={setTheme} onClose={() => setThemeOpen(false)} />}
     </>
   );
 }
 
-function UsagePill({ usage }: { usage: UsageInfo }) {
-  const tone = (p: number) => (p >= 90 ? "text-danger" : p >= 70 ? "text-warn" : "text-cyan");
-  const fill = (p: number) => (p >= 90 ? "bg-danger" : p >= 70 ? "bg-warn" : "bg-cyan");
-  const title = [
-    ...usage.windows.map(
-      (w) => `${w.label} ${Math.round(w.usedPercentage)}%${w.resetsAt ? ` · resets ${new Date(w.resetsAt).toLocaleString()}` : ""}`,
-    ),
-    usage.updatedAt ? `updated ${timeAgo(usage.updatedAt)}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+const usageTone = (p: number) => (p >= 90 ? "text-danger" : p >= 70 ? "text-warn" : "text-cyan");
+const usageFill = (p: number) => (p >= 90 ? "bg-danger" : p >= 70 ? "bg-warn" : "bg-cyan");
 
+function UsagePill({ usage, open, onToggle }: { usage: UsageInfo; open: boolean; onToggle: () => void }) {
   return (
-    <span
+    <button
       data-testid="usage-pill"
-      title={title}
-      className={`flex items-center gap-[10px] rounded-full border border-line px-[14px] py-[6px] font-mono text-[11px] ${
-        usage.stale ? "opacity-55" : ""
-      }`}
+      onClick={onToggle}
+      title="usage limits — click for details"
+      className={`flex cursor-pointer items-center gap-[10px] rounded-full border px-[14px] py-[6px] font-mono text-[11px] hover:border-cyan/40 ${
+        open ? "border-cyan/50" : "border-line"
+      } ${usage.stale ? "opacity-55" : ""}`}
     >
       {usage.windows.map((w) => (
-        <span key={w.key} className={`flex items-center gap-[6px] ${tone(w.usedPercentage)}`} data-testid={`usage-${w.label}`}>
+        <span key={w.key} className={`flex items-center gap-[6px] ${usageTone(w.usedPercentage)}`} data-testid={`usage-${w.label}`}>
           {w.label}
           <span className="h-[5px] w-9 overflow-hidden rounded-full bg-white/10">
-            <span className={`block h-full ${fill(w.usedPercentage)}`} style={{ width: `${w.usedPercentage}%` }} />
+            <span className={`block h-full ${usageFill(w.usedPercentage)}`} style={{ width: `${w.usedPercentage}%` }} />
           </span>
           {Math.round(w.usedPercentage)}%
         </span>
       ))}
       {usage.stale && <span className="text-faint">· stale</span>}
-    </span>
+      <span className="text-faint">{open ? "▴" : "▾"}</span>
+    </button>
+  );
+}
+
+const WINDOW_NAME: Record<string, string> = { "5h": "5-hour session", week: "weekly" };
+
+function UsagePanel({ usage, onClose }: { usage: UsageInfo; onClose: () => void }) {
+  return (
+    <div
+      data-testid="usage-panel"
+      className="mt-4 rounded-[16px] border border-line bg-glass px-5 py-4 backdrop-blur-[8px]"
+    >
+      <div className="mb-3 flex items-center">
+        <p className="font-mono text-[11px] tracking-[0.08em] text-muted uppercase">usage limits</p>
+        <button
+          onClick={onClose}
+          data-testid="usage-panel-close"
+          className="ml-auto cursor-pointer font-mono text-[11px] text-faint hover:text-cyan"
+          aria-label="collapse"
+        >
+          ✕
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+        {usage.windows.map((w) => (
+          <div key={w.key} data-testid={`usage-detail-${w.label}`}>
+            <div className="flex items-baseline justify-between">
+              <span className="font-mono text-[12px] text-muted">{WINDOW_NAME[w.label] ?? w.label}</span>
+              <span className={`font-disp text-[22px] font-bold ${usageTone(w.usedPercentage)}`}>
+                {Math.round(w.usedPercentage)}%
+              </span>
+            </div>
+            <span className="mt-2 block h-[9px] overflow-hidden rounded-full bg-white/10">
+              <span className={`block h-full ${usageFill(w.usedPercentage)}`} style={{ width: `${w.usedPercentage}%` }} />
+            </span>
+            <span className="mt-[6px] block font-mono text-[11px] text-faint">
+              {w.resetsAt ? `resets ${new Date(w.resetsAt).toLocaleString()}` : "reset time unknown"}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 border-t border-line pt-3 font-mono text-[11px] text-faint">
+        {usage.model ? `${usage.model} · ` : ""}
+        {usage.updatedAt ? `updated ${timeAgo(usage.updatedAt)}` : ""}
+        {usage.stale ? " · stale (no session running)" : ""} · fed by the statusline bridge
+      </p>
+    </div>
   );
 }
 

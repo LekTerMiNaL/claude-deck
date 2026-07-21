@@ -12,36 +12,55 @@ test("default is midnight: no data-theme, dark navy background", async ({ page }
   expect(await bodyBg(page)).toBe("rgb(10, 13, 28)"); // #0a0d1c
 });
 
-test("cycling switches skin for real and persists across pages + reload", async ({ page }) => {
+test("theme picker: pick applies live, marks active, persists, closes", async ({ page }) => {
   await page.goto("/");
-  const toggle = page.getByTestId("theme-toggle");
+  await page.getByTestId("theme-toggle").click();
+  const modal = page.getByTestId("theme-modal");
+  await expect(modal).toBeVisible();
+  await expect(modal.getByTestId("theme-option-midnight").getByTestId("theme-active")).toBeVisible();
 
-  // → arcade: purple sky, tokens swapped
-  await toggle.click();
+  // pick arcade → live swap behind the modal
+  await modal.getByTestId("theme-option-arcade").click();
   expect(await htmlTheme(page)).toBe("arcade");
-  await expect(toggle).toContainText("arcade");
-  const arcadeInk = await page.evaluate(() =>
+  await expect(modal.getByTestId("theme-option-arcade").getByTestId("theme-active")).toBeVisible();
+  const vio = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue("--color-vio").trim(),
   );
-  expect(arcadeInk).toBe("#ff6ec7");
+  expect(vio).toBe("#ff6ec7");
 
-  // → dopamine: light cream background actually applied
-  await toggle.click();
+  // pick dopamine → light background actually applied
+  await modal.getByTestId("theme-option-dopamine").click();
   expect(await htmlTheme(page)).toBe("dopamine");
-  const bg = await bodyBg(page);
-  expect(bg).not.toBe("rgb(10, 13, 28)");
+  expect(await bodyBg(page)).not.toBe("rgb(10, 13, 28)");
 
-  // persists on another page and across reload
+  // Esc closes; choice persists on another page + reload
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("theme-modal")).toHaveCount(0);
   await page.getByTestId("stats-link").click();
   await expect(page.getByTestId("kpi-row")).toBeVisible();
   expect(await htmlTheme(page)).toBe("dopamine");
   await page.goto("/");
   expect(await htmlTheme(page)).toBe("dopamine");
+  await expect(page.getByTestId("theme-toggle")).toContainText("dopamine");
 
-  // → back to midnight
+  // reset to midnight for later specs
   await page.getByTestId("theme-toggle").click();
-  expect(await htmlTheme(page)).toBe("");
-  expect(await bodyBg(page)).toBe("rgb(10, 13, 28)");
+  await page.getByTestId("theme-option-midnight").click();
+  await page.keyboard.press("Escape");
+});
+
+test("arcade keeps body text readable (Inter, not the pixel font)", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("theme-toggle").click();
+  await page.getByTestId("theme-option-arcade").click();
+  await page.keyboard.press("Escape");
+  const bodyFont = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+  expect(bodyFont).toContain("Inter");
+  expect(bodyFont).not.toContain("Press Start");
+  // reset
+  await page.getByTestId("theme-toggle").click();
+  await page.getByTestId("theme-option-midnight").click();
+  await page.keyboard.press("Escape");
 });
 
 test("garbage in localStorage falls back to midnight", async ({ page }) => {

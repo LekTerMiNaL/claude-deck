@@ -34,6 +34,26 @@ test("usage pill shows 5h + week windows with the right tones", async ({ page })
   await expect(pill).not.toContainText("stale");
 });
 
+test("clicking the pill expands an inline detail panel; clicking again hides it", async ({ page }) => {
+  writeUsage({ updatedAt: Date.now() });
+  await page.goto("/");
+
+  await expect(page.getByTestId("usage-panel")).toHaveCount(0);
+  await page.getByTestId("usage-pill").click();
+
+  const panel = page.getByTestId("usage-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel.getByTestId("usage-detail-5h")).toContainText("5-hour session");
+  await expect(panel.getByTestId("usage-detail-5h")).toContainText("34%");
+  await expect(panel.getByTestId("usage-detail-week")).toContainText("weekly");
+  await expect(panel.getByTestId("usage-detail-week")).toContainText("81%");
+  await expect(panel).toContainText("resets");
+  await expect(panel).toContainText("statusline bridge");
+
+  await page.getByTestId("usage-panel-close").click();
+  await expect(page.getByTestId("usage-panel")).toHaveCount(0);
+});
+
 test("old data is marked stale", async ({ page }) => {
   writeUsage({ updatedAt: Date.now() - 30 * 60_000 });
   await page.goto("/");

@@ -47,7 +47,11 @@ clean and never commit anything containing the owner's transcript data.
       fonts bundled via @fontsource, header cycle button, localStorage; chart palettes
       validated per surface (approved mocks: `docs/mockups/theme-*.html`;
       spec: `docs/spec/phase-8-themes.md`, merged 2026-07-21)
-- Full gate as of Phase 8: 79 Vitest unit + 49 Playwright e2e, all on synthesized fixtures
+- [x] Phase 8b: theme picker modal (mini previews, replaces cycle button), usage pill
+      click → inline full-row detail panel, arcade readability fix (pixel font on
+      headings/buttons only; body back to Inter/JetBrains) (spec: `docs/spec/phase-8b-polish.md`,
+      merged 2026-07-21)
+- Full gate as of Phase 8b: 79 Vitest unit + 51 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck
