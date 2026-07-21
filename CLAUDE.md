@@ -51,7 +51,11 @@ clean and never commit anything containing the owner's transcript data.
       click → inline full-row detail panel, arcade readability fix (pixel font on
       headings/buttons only; body back to Inter/JetBrains) (spec: `docs/spec/phase-8b-polish.md`,
       merged 2026-07-21)
-- Full gate as of Phase 8b: 79 Vitest unit + 51 Playwright e2e, all on synthesized fixtures
+- [x] Phase 8c: 8 more themes (11 total) — phosphor · neon-tokyo · dracula · nord ·
+      catppuccin · mono · paper (serif) · thai; additive `[data-theme]` blocks, chart
+      palettes validated per surface, `--color-grid` tokenized, Lora bundled for paper
+      (spec: `docs/spec/phase-8c-more-themes.md`, merged 2026-07-21)
+- Full gate as of Phase 8c: 79 Vitest unit + 52 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck
