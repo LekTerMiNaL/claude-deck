@@ -101,7 +101,21 @@ Set `CLAUDE_DECK_PORT` to change the port.
 Claude Code feeds rate-limit data (5-hour + weekly windows) to statusline scripts.
 claude-deck ships a tiny bridge that persists it — to claude-deck's own config dir,
 never into `~/.claude` — and doubles as a compact terminal statusline
-(`Opus 4.8 · 5h 34% · wk 12%`). Enable it by adding to `~/.claude/settings.json`:
+(`Opus 4.8 · 5h 34% · wk 12%`).
+
+**The easy way** — one command wires it up for you (backs up `settings.json` first,
+won't clobber an existing statusLine without `--force`):
+
+```sh
+npx claude-deck setup-statusline          # or: claude-deck setup-statusline
+claude-deck setup-statusline --print      # just print the snippet, change nothing
+claude-deck setup-statusline --revert     # remove it again
+```
+
+This is the only thing in claude-deck that writes to `~/.claude`, and only because
+you ran it. The server never touches `~/.claude`.
+
+**Or by hand** — add to `~/.claude/settings.json`:
 
 ```json
 "statusLine": {
@@ -110,8 +124,9 @@ never into `~/.claude` — and doubles as a compact terminal statusline
 }
 ```
 
-The dashboard header then shows the usage bars (they update while any Claude Code
-session is running). Remove the key to turn it all off.
+Either way, restart Claude Code — the dashboard header then shows the usage bars (they
+update while any session is running). Until it's set up, the header shows a one-click
+setup hint instead. Remove the key (or `--revert`) to turn it all off.
 
 ## Development
 
