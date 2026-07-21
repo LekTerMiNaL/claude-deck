@@ -115,6 +115,7 @@ export const api = {
     ),
   capabilities: () => get<{ openTerminal: boolean; summarize: boolean }>("/api/capabilities"),
   usage: () => get<UsageInfo>("/api/usage"),
+  usageSetup: () => get<UsageSetup>("/api/usage/setup"),
   stats: () => get<StatsPayload>("/api/stats"),
   timeline: (limit = 100) => get<{ entries: TimelineEntry[] }>(`/api/timeline?limit=${limit}`),
   search: (q: string, limit = 50) =>
@@ -174,6 +175,12 @@ export interface UsageInfo {
   model: string | null;
   windows: UsageWindow[];
   stale: boolean;
+}
+
+export interface UsageSetup {
+  bridgePath: string;
+  settingsPath: string;
+  snippet: string;
 }
 
 export interface DeepMatch {

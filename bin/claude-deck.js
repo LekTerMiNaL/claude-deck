@@ -51,7 +51,13 @@ options:
   -v, --version    print version
   -h, --help       this help
 
-The server binds 127.0.0.1 only and reads ~/.claude strictly read-only.`;
+commands:
+  setup-statusline [--print|--dry-run] [--force] [--revert]
+                   wire the usage bars into ~/.claude/settings.json
+
+The server binds 127.0.0.1 only and reads ~/.claude strictly read-only.
+(The setup-statusline command is the one exception — a user-invoked, backup-first
+write to settings.json. The server itself never writes ~/.claude.)`;
 
 async function waitForServer(url, tries = 100) {
   for (let i = 0; i < tries; i++) {
@@ -67,9 +73,15 @@ async function waitForServer(url, tries = 100) {
 }
 
 async function main() {
+  const raw = process.argv.slice(2);
+  if (raw[0] === "setup-statusline") {
+    const { run } = await import("./setup-statusline.js");
+    process.exit(run(raw.slice(1)));
+  }
+
   let opts;
   try {
-    opts = parseArgs(process.argv.slice(2));
+    opts = parseArgs(raw);
   } catch (err) {
     console.error(String(err instanceof Error ? err.message : err));
     console.error(HELP);

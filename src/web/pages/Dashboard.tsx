@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, timeAgo, uptime, type DeckCard, type LiveCard, type UsageInfo } from "../lib/api";
+import { api, timeAgo, uptime, type DeckCard, type LiveCard, type UsageInfo, type UsageSetup } from "../lib/api";
 import { projectUrl } from "../lib/router";
 import { pollMs } from "../lib/config";
 import { useIdleNotifications } from "../hooks/useIdleNotifications";
@@ -15,6 +15,7 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [usageOpen, setUsageOpen] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(usageHintDismissed);
   const [theme, setTheme] = useState<Theme>(savedTheme);
   const notify = useIdleNotifications();
   const { onPoll } = notify; // stable useCallback — keep refresh identity steady
@@ -61,6 +62,17 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
             </button>
             {usage?.configured && (
               <UsagePill usage={usage} open={usageOpen} onToggle={() => setUsageOpen((o) => !o)} />
+            )}
+            {usage && !usage.configured && !hintDismissed && (
+              <UsageSetupHint
+                open={usageOpen}
+                onToggle={() => setUsageOpen((o) => !o)}
+                onDismiss={() => {
+                  dismissUsageHint();
+                  setHintDismissed(true);
+                  setUsageOpen(false);
+                }}
+              />
             )}
             <button
               data-testid="notif-toggle"
@@ -120,6 +132,9 @@ export function Dashboard({ navigate }: { navigate: (to: string) => void }) {
         </header>
 
         {usage?.configured && usageOpen && <UsagePanel usage={usage} onClose={() => setUsageOpen(false)} />}
+        {usage && !usage.configured && !hintDismissed && usageOpen && (
+          <UsageSetupPanel onClose={() => setUsageOpen(false)} />
+        )}
 
         <p className="sect mt-[34px] mb-[14px]">Live now</p>
         {live.length === 0 ? (
@@ -245,6 +260,106 @@ function UsagePanel({ usage, onClose }: { usage: UsageInfo; onClose: () => void 
         {usage.model ? `${usage.model} · ` : ""}
         {usage.updatedAt ? `updated ${timeAgo(usage.updatedAt)}` : ""}
         {usage.stale ? " · stale (no session running)" : ""} · fed by the statusline bridge
+      </p>
+    </div>
+  );
+}
+
+const HINT_KEY = "claude-deck:usage-hint-dismissed";
+
+function usageHintDismissed(): boolean {
+  try {
+    return localStorage.getItem(HINT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function dismissUsageHint(): void {
+  try {
+    localStorage.setItem(HINT_KEY, "1");
+  } catch {
+    // storage unavailable — dismissal just won't persist
+  }
+}
+
+function UsageSetupHint({ open, onToggle, onDismiss }: { open: boolean; onToggle: () => void; onDismiss: () => void }) {
+  return (
+    <span
+      data-testid="usage-setup-hint"
+      className={`flex items-center gap-2 rounded-full border px-[12px] py-[6px] font-mono text-[11px] ${
+        open ? "border-cyan/50" : "border-line"
+      }`}
+    >
+      <button onClick={onToggle} className="flex cursor-pointer items-center gap-2 text-muted hover:text-cyan">
+        <span className="text-vio">❯</span> set up usage bars <span className="text-faint">{open ? "▴" : "▾"}</span>
+      </button>
+      <button
+        onClick={onDismiss}
+        data-testid="usage-hint-dismiss"
+        title="dismiss"
+        className="cursor-pointer text-faint hover:text-cyan"
+        aria-label="dismiss"
+      >
+        ✕
+      </button>
+    </span>
+  );
+}
+
+function UsageSetupPanel({ onClose }: { onClose: () => void }) {
+  const [setup, setSetup] = useState<UsageSetup | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    api.usageSetup().then(setSetup).catch(() => {});
+  }, []);
+
+  const copy = async () => {
+    if (!setup) return;
+    await navigator.clipboard.writeText(setup.snippet);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  return (
+    <div
+      data-testid="usage-setup-panel"
+      className="mt-4 rounded-[16px] border border-line bg-glass px-5 py-4 backdrop-blur-[8px]"
+    >
+      <div className="mb-3 flex items-center">
+        <p className="font-mono text-[11px] tracking-[0.08em] text-muted uppercase">turn on usage bars</p>
+        <button
+          onClick={onClose}
+          data-testid="usage-setup-close"
+          className="ml-auto cursor-pointer font-mono text-[11px] text-faint hover:text-cyan"
+          aria-label="collapse"
+        >
+          ✕
+        </button>
+      </div>
+      <p className="text-[12.5px] text-muted">
+        The 5-hour and weekly bars read data that Claude Code only exposes to a{" "}
+        <span className="text-ink">statusLine</span> command. Add this to{" "}
+        <span className="font-mono text-cyan">{setup?.settingsPath ?? "~/.claude/settings.json"}</span>, then restart
+        Claude Code:
+      </p>
+      <div className="mt-3 flex items-start gap-3">
+        <pre className="min-w-0 flex-1 overflow-x-auto rounded-[10px] border border-line bg-panel px-3 py-2 font-mono text-[11px] text-muted">
+          {setup?.snippet ?? "…"}
+        </pre>
+        <button
+          onClick={() => void copy()}
+          data-testid="usage-setup-copy"
+          disabled={!setup}
+          className="flex-none cursor-pointer rounded-[9px] bg-gradient-to-r from-vio to-cyan px-4 py-[7px] font-disp text-[12px] font-bold text-bg disabled:opacity-50"
+        >
+          {copied ? "copied ✓" : "copy"}
+        </button>
+      </div>
+      <p className="mt-3 border-t border-line pt-3 font-mono text-[11px] text-faint">
+        or let the CLI do it: <span className="text-cyan">npx claude-deck setup-statusline</span> · you also get a
+        compact terminal statusline as a bonus. See the README for details.
       </p>
     </div>
   );

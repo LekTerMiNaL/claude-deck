@@ -55,7 +55,12 @@ clean and never commit anything containing the owner's transcript data.
       catppuccin · mono · paper (serif) · thai; additive `[data-theme]` blocks, chart
       palettes validated per surface, `--color-grid` tokenized, Lora bundled for paper
       (spec: `docs/spec/phase-8c-more-themes.md`, merged 2026-07-21)
-- Full gate as of Phase 8c: 79 Vitest unit + 52 Playwright e2e, all on synthesized fixtures
+- [x] Phase 9: usage-bar onboarding — (A) in-app dismissible setup hint when
+      rate-limits.json is missing (was a silent hidden pill), with copyable snippet;
+      (B) `claude-deck setup-statusline` CLI that writes `~/.claude/settings.json`
+      (backup-first, non-clobbering — the one sanctioned write, user-invoked only)
+      (spec: `docs/spec/phase-9-usage-onboarding.md`, merged 2026-07-21)
+- Full gate as of Phase 9: 91 Vitest unit + 54 Playwright e2e, all on synthesized fixtures
 
 ## Decisions already made (with the owner)
 - **Name**: `claude-deck`. Public GitHub repo (MIT): https://github.com/LekTerMiNaL/claude-deck
@@ -68,7 +73,11 @@ clean and never commit anything containing the owner's transcript data.
   3. register a **root folder** (e.g. `~/Documents/AiProject`) — its subfolders show up as
      addable projects, including ones with no Claude history yet.
 - **Deck config** lives at `~/.claude-deck/config.json` (projects added, roots registered).
-  `~/.claude` is **read-only, always** — never write there.
+  `~/.claude` is **read-only, always** — never write there. **One narrow exception**
+  (owner-approved 2026-07-21, Phase 9): the `claude-deck setup-statusline` CLI edits
+  `~/.claude/settings.json` — but only when a human runs that command, backing up first
+  and never clobbering a foreign statusLine without `--force`. **The server never writes
+  `~/.claude`.**
 - **Local-only**: bind `127.0.0.1`, no telemetry, no external calls. This is the security story
   for a public repo whose users point it at their private transcripts.
 - **Stack**: TypeScript everywhere. Server = Hono on Node (`@hono/node-server`), serves both the

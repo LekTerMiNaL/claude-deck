@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { spawn, execFileSync } from "node:child_process";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -54,4 +55,23 @@ test("--version prints the package version, --help documents flags", () => {
 
 test("unknown flags exit non-zero with usage", () => {
   expect(() => execFileSync("node", [BIN, "--bogus"], { encoding: "utf8", stdio: "pipe" })).toThrow();
+});
+
+test("setup-statusline subcommand dispatches: --print emits the snippet, writes nothing", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "cd-bin-setup-"));
+  try {
+    const out = execFileSync("node", [BIN, "setup-statusline", "--print", "--claude-dir", dir], { encoding: "utf8" });
+    expect(out).toContain('"statusLine"');
+    expect(out).toContain("statusline-bridge.mjs");
+    expect(fs.existsSync(path.join(dir, "settings.json"))).toBe(false); // --print never writes
+
+    // real write path through the bin, into a throwaway dir
+    const code = execFileSync("node", [BIN, "setup-statusline", "--claude-dir", dir], { encoding: "utf8" });
+    expect(code).toContain("restart Claude Code");
+    const settings = JSON.parse(fs.readFileSync(path.join(dir, "settings.json"), "utf8"));
+    expect(settings.statusLine.type).toBe("command");
+    expect(settings.statusLine.command).toContain("statusline-bridge.mjs");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

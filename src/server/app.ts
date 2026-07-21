@@ -18,7 +18,7 @@ import {
 import { canOpenTerminal, openInTerminal } from "./data/terminal.js";
 import { timeline, historyEntries } from "./data/timeline.js";
 import { listSessionAgents, readSubagentThread, AGENT_ID_RE } from "./data/subagents.js";
-import { readUsage } from "./data/usage.js";
+import { readUsage, usageSetup } from "./data/usage.js";
 import { buildStats } from "./data/stats.js";
 import { refreshTextIndex, deepSearch } from "./data/text-index.js";
 
@@ -162,6 +162,8 @@ export function createApp(): Hono {
   });
 
   app.get("/api/usage", (c) => c.json(readUsage()));
+
+  app.get("/api/usage/setup", (c) => c.json(usageSetup()));
 
   app.get("/api/stats", (c) => c.json(buildStats()));
 

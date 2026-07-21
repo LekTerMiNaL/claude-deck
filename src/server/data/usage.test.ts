@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { normalizeRateLimits, readUsage } from "./usage.js";
+import { normalizeRateLimits, readUsage, usageSetup, bridgePath } from "./usage.js";
 import { makeWorld, type FixtureWorld } from "./test-helpers.js";
 
 let world: FixtureWorld;
@@ -115,5 +115,24 @@ describe("statusline-bridge.mjs (real child process)", () => {
   it("never breaks on garbage stdin — still prints and exits 0", () => {
     const out = run("{{{not json");
     expect(out.trim()).toBe("claude");
+  });
+});
+
+describe("usageSetup", () => {
+  it("resolves an absolute bridge path ending scripts/statusline-bridge.mjs", () => {
+    const bp = bridgePath();
+    expect(path.isAbsolute(bp)).toBe(true);
+    expect(bp.endsWith(path.join("scripts", "statusline-bridge.mjs"))).toBe(true);
+    expect(fs.existsSync(bp)).toBe(true); // the file it points at really exists
+  });
+
+  it("builds a paste-ready snippet + the settings path", () => {
+    const setup = usageSetup();
+    expect(setup.snippet).toContain('"type": "command"');
+    expect(setup.snippet).toContain('"statusLine"');
+    expect(setup.snippet).toContain(setup.bridgePath);
+    expect(setup.settingsPath.endsWith(path.join("settings.json"))).toBe(true);
+    // settingsPath honors CLAUDE_DECK_CLAUDE_DIR (set by makeWorld)
+    expect(setup.settingsPath.startsWith(world.claudeDir)).toBe(true);
   });
 });
