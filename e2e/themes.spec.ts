@@ -69,3 +69,32 @@ test("garbage in localStorage falls back to midnight", async ({ page }) => {
   expect(await htmlTheme(page)).toBe("");
   await expect(page.getByTestId("theme-toggle")).toContainText("midnight");
 });
+
+// Each theme must actually apply a distinct background — a data-driven sweep over
+// all of them so a broken token block can't slip through.
+const EXPECTED_BG: Record<string, string> = {
+  phosphor: "rgb(10, 20, 16)",
+  dracula: "rgb(40, 42, 54)",
+  nord: "rgb(46, 52, 64)",
+  catppuccin: "rgb(30, 30, 46)",
+  mono: "rgb(12, 12, 12)",
+  paper: "rgb(244, 241, 232)",
+};
+
+test("every theme applies its own background via the picker", async ({ page }) => {
+  await page.goto("/");
+  for (const [theme, bg] of Object.entries(EXPECTED_BG)) {
+    await page.getByTestId("theme-toggle").click();
+    await page.getByTestId(`theme-option-${theme}`).click();
+    await page.keyboard.press("Escape");
+    expect(await htmlTheme(page)).toBe(theme);
+    // solid-color themes have an exact bg; gradient ones (arcade/neon-tokyo/thai)
+    // are covered by the dedicated flow above
+    expect(await bodyBg(page)).toBe(bg);
+  }
+  // reset
+  await page.getByTestId("theme-toggle").click();
+  await page.getByTestId("theme-option-midnight").click();
+  await page.keyboard.press("Escape");
+  expect(await htmlTheme(page)).toBe("");
+});

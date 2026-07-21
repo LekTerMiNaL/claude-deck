@@ -83,7 +83,7 @@ export function ColumnChart({ data, series, xEvery = 7, formatX = (x) => x, heig
         {/* recessive solid hairline grid + clean ticks */}
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={PAD_L} x2={W - PAD_R} y1={yOf(t)} y2={yOf(t)} stroke="rgba(255,255,255,0.06)" strokeWidth={1} />
+            <line x1={PAD_L} x2={W - PAD_R} y1={yOf(t)} y2={yOf(t)} stroke="var(--color-grid)" strokeWidth={1} />
             <text x={PAD_L - 6} y={yOf(t) + 3} textAnchor="end" fontSize={9} fill="var(--color-faint)" fontFamily="var(--font-mono)">
               {compactNumber(t)}
             </text>

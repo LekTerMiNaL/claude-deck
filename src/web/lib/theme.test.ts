@@ -2,8 +2,10 @@ import { describe, it, expect } from "vitest";
 import { THEMES, normalizeTheme, THEME_META } from "./theme.js";
 
 describe("theme", () => {
-  it("has midnight first (the default)", () => {
+  it("has midnight first (the default) and a unique set of 11", () => {
     expect(THEMES[0]).toBe("midnight");
+    expect(THEMES.length).toBeGreaterThanOrEqual(11);
+    expect(new Set(THEMES).size).toBe(THEMES.length);
   });
 
   it("normalizes unknown/legacy values to midnight", () => {

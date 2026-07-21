@@ -12,6 +12,9 @@
 @import "@fontsource/bricolage-grotesque/500.css";
 @import "@fontsource/bricolage-grotesque/700.css";
 @import "@fontsource/bricolage-grotesque/800.css";
+@import "@fontsource/lora/400.css";
+@import "@fontsource/lora/500.css";
+@import "@fontsource/lora/700.css";
 
 @theme {
   --color-bg: #0a0d1c;
@@ -21,6 +24,7 @@
   --color-line: rgba(255, 255, 255, 0.09);
   --color-glass: rgba(255, 255, 255, 0.045);
   --color-panel: #0d1122;
+  --color-grid: rgba(255, 255, 255, 0.06);
   --color-vio: #a78bfa;
   --color-cyan: #67e8f9;
   --color-busy: #4ade80;
@@ -102,6 +106,7 @@
   --color-line: rgba(26, 16, 35, 0.85);
   --color-glass: #fffdf8;
   --color-panel: #fffdf8;
+  --color-grid: rgba(26, 16, 35, 0.1);
   --color-vio: #ff3d8a;
   --color-cyan: #0284c7;
   --color-busy: #4d9e0e;
@@ -131,6 +136,208 @@
 }
 [data-theme="dopamine"] .glow { display: none; }
 [data-theme="dopamine"] .cursor-blink { box-shadow: none; }
+
+/* ── theme: phosphor (green CRT terminal) ── */
+[data-theme="phosphor"] {
+  --color-bg: #0a1410;
+  --color-ink: #86ffa5;
+  --color-muted: #46b06a;
+  --color-faint: #2c6b41;
+  --color-line: rgba(125, 255, 154, 0.16);
+  --color-glass: rgba(125, 255, 154, 0.045);
+  --color-panel: #0f1c15;
+  --color-grid: rgba(125, 255, 154, 0.1);
+  --color-vio: #6bff8f;
+  --color-cyan: #38e0a0;
+  --color-busy: #86ffa5;
+  --color-warn: #ffcf4a;
+  --color-danger: #ff6b6b;
+  --font-disp: "JetBrains Mono", monospace;
+  --font-body: "JetBrains Mono", monospace;
+  --font-mono: "JetBrains Mono", monospace;
+}
+[data-theme="phosphor"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+}
+[data-theme="phosphor"] .bg-glass { box-shadow: 0 0 18px rgba(125, 255, 154, 0.06); }
+[data-theme="phosphor"] .glow-1 { background: rgba(125, 255, 154, 0.1); }
+[data-theme="phosphor"] .glow-2 { background: rgba(56, 224, 160, 0.08); }
+
+/* ── theme: neon-tokyo (cyberpunk red/gold/cyan) ── */
+[data-theme="neon-tokyo"] {
+  --color-bg: #12071f;
+  --color-ink: #fbe9ff;
+  --color-muted: #c39bd8;
+  --color-faint: #6e4a86;
+  --color-line: rgba(255, 46, 99, 0.22);
+  --color-glass: rgba(40, 15, 60, 0.6);
+  --color-panel: #1c0d2e;
+  --color-grid: rgba(255, 46, 99, 0.12);
+  --color-vio: #ff2e63;
+  --color-cyan: #08f7fe;
+  --color-busy: #39ff88;
+  --color-warn: #ffd700;
+  --color-danger: #ff2e63;
+  --font-disp: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+[data-theme="neon-tokyo"] body {
+  background: linear-gradient(180deg, #12071f, #1a0b2e 75%, #250f3e);
+  background-attachment: fixed;
+}
+[data-theme="neon-tokyo"] body::after {
+  content: "";
+  position: fixed;
+  left: -10%;
+  right: -10%;
+  bottom: -40px;
+  height: 220px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.25;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 46, 99, 0.5) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(8, 247, 254, 0.4) 0 1px, transparent 1px 60px);
+  transform: perspective(300px) rotateX(58deg);
+  mask-image: linear-gradient(180deg, transparent, black 45%);
+}
+[data-theme="neon-tokyo"] .bg-glass { box-shadow: 0 0 22px rgba(255, 46, 99, 0.1); backdrop-filter: blur(8px); }
+[data-theme="neon-tokyo"] .glow-1 { background: rgba(255, 46, 99, 0.14); }
+[data-theme="neon-tokyo"] .glow-2 { background: rgba(8, 247, 254, 0.1); }
+
+/* ── theme: dracula ── */
+[data-theme="dracula"] {
+  --color-bg: #282a36;
+  --color-ink: #f8f8f2;
+  --color-muted: #bdc0da;
+  --color-faint: #6272a4;
+  --color-line: rgba(98, 114, 164, 0.32);
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-panel: #21222c;
+  --color-grid: rgba(248, 248, 242, 0.08);
+  --color-vio: #bd93f9;
+  --color-cyan: #8be9fd;
+  --color-busy: #50fa7b;
+  --color-warn: #f1fa8c;
+  --color-danger: #ff5555;
+}
+
+/* ── theme: nord ── */
+[data-theme="nord"] {
+  --color-bg: #2e3440;
+  --color-ink: #eceff4;
+  --color-muted: #b6c0d2;
+  --color-faint: #6b7488;
+  --color-line: rgba(136, 192, 208, 0.24);
+  --color-glass: rgba(255, 255, 255, 0.05);
+  --color-panel: #272c36;
+  --color-grid: rgba(236, 239, 244, 0.09);
+  --color-vio: #b48ead;
+  --color-cyan: #88c0d0;
+  --color-busy: #a3be8c;
+  --color-warn: #ebcb8b;
+  --color-danger: #bf616a;
+}
+
+/* ── theme: catppuccin (mocha) ── */
+[data-theme="catppuccin"] {
+  --color-bg: #1e1e2e;
+  --color-ink: #cdd6f4;
+  --color-muted: #a6adc8;
+  --color-faint: #6c7086;
+  --color-line: rgba(137, 180, 250, 0.2);
+  --color-glass: rgba(255, 255, 255, 0.045);
+  --color-panel: #181825;
+  --color-grid: rgba(205, 214, 244, 0.09);
+  --color-vio: #cba6f7;
+  --color-cyan: #89b4fa;
+  --color-busy: #a6e3a1;
+  --color-warn: #f9e2af;
+  --color-danger: #f38ba8;
+}
+
+/* ── theme: mono (grayscale chrome; charts keep functional color) ── */
+[data-theme="mono"] {
+  --color-bg: #0c0c0c;
+  --color-ink: #ededed;
+  --color-muted: #9a9a9a;
+  --color-faint: #565656;
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-glass: rgba(255, 255, 255, 0.045);
+  --color-panel: #161616;
+  --color-grid: rgba(255, 255, 255, 0.08);
+  --color-vio: #d4d4d4;
+  --color-cyan: #f0f0f0;
+  --color-busy: #ffffff;
+  --color-warn: #b0b0b0;
+  --color-danger: #8a8a8a;
+}
+
+/* ── theme: paper (newspaper — light, serif) ── */
+[data-theme="paper"] {
+  --color-bg: #f4f1e8;
+  --color-ink: #1c1a15;
+  --color-muted: #57534a;
+  --color-faint: #8a8478;
+  --color-line: rgba(28, 26, 21, 0.28);
+  --color-glass: #fffef8;
+  --color-panel: #fffef8;
+  --color-grid: rgba(28, 26, 21, 0.12);
+  --color-vio: #b23b2e;
+  --color-cyan: #2b5c8a;
+  --color-busy: #3a7d34;
+  --color-warn: #a6631b;
+  --color-danger: #b23b2e;
+  --font-disp: "Lora", serif;
+  --font-body: "Lora", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-series-1: #7c3aed;
+  --color-series-2: #ea580c;
+  --color-series-3: #0369a1;
+  --color-series-4: #db2777;
+}
+[data-theme="paper"] .bg-glass { border-width: 1px; box-shadow: none; backdrop-filter: none; }
+[data-theme="paper"] .glow { display: none; }
+
+/* ── theme: thai (warm gold + crimson + jade) ── */
+[data-theme="thai"] {
+  --color-bg: #fbf3e0;
+  --color-ink: #2b1d12;
+  --color-muted: #6e5a44;
+  --color-faint: #a08a6a;
+  --color-line: rgba(43, 29, 18, 0.24);
+  --color-glass: #fffdf3;
+  --color-panel: #fffdf3;
+  --color-grid: rgba(43, 29, 18, 0.12);
+  --color-vio: #9e1b32;
+  --color-cyan: #1f7a6b;
+  --color-busy: #4e8d2b;
+  --color-warn: #b8860b;
+  --color-danger: #9e1b32;
+  --font-disp: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-series-1: #7c3aed;
+  --color-series-2: #ea580c;
+  --color-series-3: #0369a1;
+  --color-series-4: #db2777;
+}
+[data-theme="thai"] body {
+  background:
+    radial-gradient(500px 400px at 100% -8%, rgba(184, 134, 11, 0.14), transparent 70%),
+    radial-gradient(460px 400px at -4% 108%, rgba(158, 27, 50, 0.08), transparent 70%),
+    #fbf3e0;
+  background-attachment: fixed;
+}
+[data-theme="thai"] .bg-glass { border-width: 1.5px; box-shadow: 3px 3px 0 rgba(184, 134, 11, 0.25); backdrop-filter: none; }
+[data-theme="thai"] .glow { display: none; }
 
 body {
   background: var(--color-bg);
