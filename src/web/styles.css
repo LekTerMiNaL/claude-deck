@@ -9,7 +9,6 @@
 @import "@fontsource/jetbrains-mono/700.css";
 /* theme fonts (bundled — no external calls) */
 @import "@fontsource/press-start-2p/400.css";
-@import "@fontsource/vt323/400.css";
 @import "@fontsource/bricolage-grotesque/500.css";
 @import "@fontsource/bricolage-grotesque/700.css";
 @import "@fontsource/bricolage-grotesque/800.css";
@@ -52,11 +51,11 @@
   --color-busy: #9dff70;
   --color-warn: #ffd66e;
   --color-danger: #ff7d9c;
+  /* pixel font only on headings/buttons (the flavor); body + mono stay readable */
   --font-disp: "Press Start 2P", monospace;
-  --font-body: "VT323", monospace;
-  --font-mono: "VT323", monospace;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
   /* same validated series set — re-checked on #241645: ALL PASS (≥3.89:1) */
-  font-size: 17px;
 }
 [data-theme="arcade"] body {
   background:
@@ -88,6 +87,9 @@
   box-shadow: 0 0 22px rgba(92, 232, 245, 0.1);
   backdrop-filter: blur(8px);
 }
+/* the pixel display font is wide — trim it so the header stays on one line */
+[data-theme="arcade"] .font-disp { font-size: 0.82em; letter-spacing: 0; }
+[data-theme="arcade"] header > span:first-child { white-space: nowrap; }
 [data-theme="arcade"] .glow-1 { background: rgba(255, 110, 199, 0.16); }
 [data-theme="arcade"] .glow-2 { background: rgba(92, 232, 245, 0.12); }
 
