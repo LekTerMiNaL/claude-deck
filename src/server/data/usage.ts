@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { configDir } from "./paths.js";
+import { fileURLToPath } from "node:url";
+import { configDir, claudeDir } from "./paths.js";
 
 export interface UsageWindow {
   key: string;
@@ -84,4 +85,28 @@ export function readUsage(now = Date.now()): UsageInfo {
     windows,
     stale: updatedAt !== null ? now - updatedAt > STALE_MS : true,
   };
+}
+
+export interface UsageSetup {
+  /** Absolute path to the statusline bridge that feeds the usage bars. */
+  bridgePath: string;
+  /** Where the user pastes the snippet (never written by the server). */
+  settingsPath: string;
+  /** The exact JSON block to add to ~/.claude/settings.json. */
+  snippet: string;
+}
+
+/** Absolute path to scripts/statusline-bridge.mjs (package root, dev + npx). */
+export function bridgePath(): string {
+  // this module: <root>/src/server/data/usage.ts (dev) or
+  //              <root>/dist/server/data/usage.js (prod) — up 3 = package root
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  return path.resolve(here, "../../..", "scripts", "statusline-bridge.mjs");
+}
+
+/** Paths + copy-paste snippet for turning the usage bars on. Read-only. */
+export function usageSetup(): UsageSetup {
+  const bp = bridgePath();
+  const snippet = `"statusLine": {\n  "type": "command",\n  "command": "node ${bp}"\n}`;
+  return { bridgePath: bp, settingsPath: path.join(claudeDir(), "settings.json"), snippet };
 }

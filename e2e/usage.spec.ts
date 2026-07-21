@@ -60,9 +60,37 @@ test("old data is marked stale", async ({ page }) => {
   await expect(page.getByTestId("usage-pill")).toContainText("stale");
 });
 
-test("no bridge file → no pill", async ({ page }) => {
+test("no bridge file → setup hint instead of a silent-nothing", async ({ page }) => {
   fs.rmSync(FILE, { force: true });
   await page.goto("/");
   await expect(page.getByTestId("live-pill")).toBeVisible(); // page loaded
   await expect(page.getByTestId("usage-pill")).toHaveCount(0);
+
+  const hint = page.getByTestId("usage-setup-hint");
+  await expect(hint).toBeVisible();
+  await hint.getByText("set up usage bars").click();
+
+  const panel = page.getByTestId("usage-setup-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("statusLine");
+  await expect(panel).toContainText("setup-statusline"); // the CLI shortcut is mentioned
+  await expect(panel.getByTestId("usage-setup-copy")).toBeVisible();
+});
+
+test("dismissing the hint hides it and remembers across reload", async ({ page }) => {
+  fs.rmSync(FILE, { force: true });
+  await page.goto("/");
+  await page.getByTestId("usage-hint-dismiss").click();
+  await expect(page.getByTestId("usage-setup-hint")).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByTestId("live-pill")).toBeVisible();
+  await expect(page.getByTestId("usage-setup-hint")).toHaveCount(0); // localStorage remembered
+});
+
+test("once the bridge file exists, the hint is gone and the pill is back", async ({ page }) => {
+  writeUsage({ updatedAt: Date.now() });
+  await page.goto("/");
+  await expect(page.getByTestId("usage-pill")).toBeVisible();
+  await expect(page.getByTestId("usage-setup-hint")).toHaveCount(0);
 });
